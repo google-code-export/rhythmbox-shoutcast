@@ -21,7 +21,7 @@
   </object>
   <object class="GtkListStore" id="liststore2">
     <columns>
-      <!-- column-name Station name -->
+      <!-- column-name Station -->
       <column type="gchararray"/>
     </columns>
     <data>
@@ -47,6 +47,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="orientation">vertical</property>
+            <property name="position">150</property>
             <child>
               <object class="GtkVBox" id="vbox1">
                 <property name="visible">True</property>
