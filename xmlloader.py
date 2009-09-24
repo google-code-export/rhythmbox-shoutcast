@@ -8,11 +8,29 @@ class XmlLoader:
   shell = None
   entry_type = None
   
+  # local file name
   file_local = None
+  # local temporary file name (temporary download location)
   file_local_temp = None
+  # where to get this file from the internet
   file_url = None
   
+  # xml hander for file_local file
   xml_handler = None
+  
+  update_id = None
+  # rb.UpdateCheck() comparator
+  catalogue_check = None
+  # indicate file completely downloaded
+  has_loaded = False
+  # xml file parser (parse and commit data to rhythmdb)
+  catalogue_loader = None
+  # finally flag (everything done) None/False/True
+  updating = None
+  
+  # parser/downloader status
+  load_current_size = None
+  load_total_size = None
   
   def __init__(self):
     pass
@@ -23,7 +41,7 @@ class XmlLoader:
 
   def update_catalogue(self):
     self.catalogue_check = rb.UpdateCheck()
-    self.catalogue_check.check_for_update(file_local, file_url, update_cb)
+    self.catalogue_check.check_for_update(file_local, file_url, self.update_cb)
 
   def update_cb (result):
       self.catalogue_check = None
@@ -68,7 +86,7 @@ class XmlLoader:
     if not result:
       out.close()
 
-      shutil.move(file_local_temp, file_local)
+      shutil.move(self.file_local_temp, self.file_local)
       self.updating = False
       self.catalogue_loader = None
       self.load_catalogue()
