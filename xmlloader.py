@@ -36,6 +36,7 @@ class XmlLoader:
     pass
   
   def update(self):
+    self.clean_keywords()
     self.update_id = gobject.timeout_add(6 * 60 * 60 * 1000, self.update_catalogue)
     self.update_catalogue()
 
@@ -49,30 +50,6 @@ class XmlLoader:
         self.catalogue_download()
       elif self.has_loaded is False:
         self.catalogue_load()
-
-  def catalogue_load(self):
-    self.notify_status_changed()
-    self.has_loaded = True
-
-    parser = xml.sax.make_parser()
-    parser.setContentHandler(self.xml_handler)
-    
-    self.catalogue_loader = rb.ChunkLoader()
-    self.catalogue_loader.get_url_chunks(file_local, 64*1024, True, self.catalogue_load_chunk_cb, parser)
-
-  def catalogue_load_chunk_cb(self, result, total, parser):
-    if not result or isinstance (result, Exception):
-      parser.close ()
-
-      self.updating = False
-      self.catalogue_loader = None
-    else:
-      parser.feed(result)
-
-      self.load_current_size += len(result)
-      self.load_total_size = total
-
-    self.notify_status_changed()
 
   def catalogue_download(self):
     self.updating = True
@@ -100,6 +77,32 @@ class XmlLoader:
 
     self.notify_status_changed()
 
+  def catalogue_load(self):
+    self.notify_status_changed()
+    self.has_loaded = True
+
+    parser = xml.sax.make_parser()
+    parser.setContentHandler(self.xml_handler)
+    
+    self.catalogue_loader = rb.ChunkLoader()
+    self.catalogue_loader.get_url_chunks(file_local, 64*1024, True, self.catalogue_load_chunk_cb, parser)
+
+  def catalogue_load_chunk_cb(self, result, total, parser):
+    if not result or isinstance (result, Exception):
+      parser.close ()
+
+      self.updating = False
+      self.catalogue_loader = None
+      
+      self.remove_old();
+    else:
+      parser.feed(result)
+
+      self.load_current_size += len(result)
+      self.load_total_size = total
+
+    self.notify_status_changed()
+
   def notify_status_changed(self):  
     if self.notify_id == 0:
       self.notify_id = gobject.idle_add(change_idle_cb)
@@ -108,3 +111,15 @@ class XmlLoader:
     self.notify_status_changed()
     self.notify_id = 0
     return False
+
+  def clean_keywords(self):
+    self.db.entry_foreach_by_type(entry_type, self.clean_keywords_db)
+
+  def clean_keywords_db(self, entry):
+    self.db.entry_keyword_remove(entry, 'new')
+
+  def remove_old(self):
+    self.db.entry_foreach_by_type(entry_type, self.remove_old_db)
+    
+  def remove_old_db(self, entry):
+    self.db.entry_keyword_has(entry, 'new')
