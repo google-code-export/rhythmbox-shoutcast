@@ -12,6 +12,8 @@ class XmlLoader:
   file_local_temp = None
   file_url = None
   
+  xml_handler = None
+  
   def __init__(self):
     pass
   
@@ -35,7 +37,7 @@ class XmlLoader:
     self.has_loaded = True
 
     parser = xml.sax.make_parser()
-    parser.setContentHandler(XmlStationsHandler(self.db, self.entry_type))
+    parser.setContentHandler(self.xml_handler)
     
     self.catalogue_loader = rb.ChunkLoader()
     self.catalogue_loader.get_url_chunks(file_local, 64*1024, True, self.catalogue_load_chunk_cb, parser)

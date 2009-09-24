@@ -10,3 +10,4 @@ class XmlGenreLoader(XmlLoader):
     self.file_local = os.path.join(cache_dir, 'genres.xml')
     self.file_local_temp = os.path.join(self.file_local, '.tmp')
     self.file_url = 'http://yp.shoutcast.com/sbin/newxml.phtml'
+    self.xml_handler = XmlGenreHandler(self.db, self.entry_type)
