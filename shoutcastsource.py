@@ -8,8 +8,8 @@ from xmlgenreloader import XmlGenreLoader
 class ShoutcastSource(rb.Source):
 
   __gproperties__ = {
-                     'plugin': (rb.Plugin, 'plugin', 'plugin', gobject.PARAM_READABLE | gobject.PARAM_CONSTRUCT_ONLY),
-                     'entry_type_g': (rhythmdb.EntryType, 'entry_type_g', 'entry_type_g', gobject.PARAM_READABLE | gobject.PARAM_CONSTRUCT_ONLY),
+                     'plugin': (rb.Plugin, 'plugin', 'plugin', gobject.PARAM_WRITABLE | gobject.PARAM_CONSTRUCT_ONLY),
+                     'entry_type_g': (rhythmdb.EntryType, 'entry_type_g', 'entry_type_g', gobject.PARAM_WRITABLE | gobject.PARAM_CONSTRUCT_ONLY),
   }
   
   db = None
@@ -55,7 +55,7 @@ class ShoutcastSource(rb.Source):
       self.builder = gtk.Builder()
       self.builder.add_from_file(os.path.join(self.plugin.find_file("shoutcast.glade")))
 
-      self.add(self.builder.get_object('scrolledwindow1'))
+      self.add(self.builder.get_object('main_vbox'))
 
     rb.Source.do_impl_activate (self)
 
