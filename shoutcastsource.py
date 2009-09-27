@@ -29,22 +29,13 @@ class ShoutcastSource(rb.Source):
     self.cache_dir = os.path.join(rb.user_cache_dir(), 'shoutcast')
 
   def do_set_property(self, property, value):
+
     if property.name == 'plugin':
       self.plugin = value
     elif property.name == 'entry_type_g':
       self.entry_type_g = value
     else:
       raise AttributeError, 'unknown property %s' % property.name
-
-    def create(self, shell, entry_type_s, entry_type_g, plugin):
-      self.shell = shell
-      self.db = self.shell.props.db
-      
-      self.entry_type_s = entry_type_s
-  
-      self.entry_type_g = entry_type_g
-  
-      self.plugin = plugin
 
   def do_impl_activate(self):
     if not self.activated:
