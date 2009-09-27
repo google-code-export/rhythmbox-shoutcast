@@ -29,7 +29,6 @@ class ShoutcastSource(rb.Source):
     self.cache_dir = os.path.join(rb.user_cache_dir(), 'shoutcast')
 
   def do_set_property(self, property, value):
-
     if property.name == 'plugin':
       self.plugin = value
     elif property.name == 'entry_type_g':
