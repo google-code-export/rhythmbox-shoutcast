@@ -28,31 +28,85 @@
     <property name="position">150</property>
     <property name="position_set">True</property>
     <child>
-      <object class="GtkVBox" id="vbox1">
+      <object class="GtkHBox" id="hbox1">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">6</property>
         <child>
-          <object class="GtkHBox" id="hbox1">
+          <object class="GtkVBox" id="vbox2">
             <property name="visible">True</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">6</property>
             <child>
-              <object class="GtkLabel" id="label1">
+              <object class="GtkHBox" id="hbox2">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">Search:</property>
+                <child>
+                  <object class="GtkLabel" id="label1">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">Search:</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="entry1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="invisible_char">&#x25CF;</property>
+                    <property name="secondary_icon_stock">gtk-clear</property>
+                    <property name="secondary_icon_activatable">True</property>
+                  </object>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="fill">False</property>
                 <property name="position">0</property>
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="entry1">
+              <object class="GtkVBox" id="vbox4">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="invisible_char">&#x25CF;</property>
-                <property name="secondary_icon_stock">gtk-clear</property>
-                <property name="secondary_icon_activatable">True</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkHBox" id="hbox4">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkLabel" id="label2">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Genres (13)</property>
+                      </object>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="button1">
+                        <property name="label" translatable="yes">gtk-refresh</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
               </object>
               <packing>
                 <property name="position">1</property>
@@ -60,28 +114,38 @@
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="padding">5</property>
             <property name="position">0</property>
           </packing>
         </child>
+      </object>
+      <packing>
+        <property name="resize">False</property>
+        <property name="shrink">True</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkHBox" id="hbox3">
+        <property name="visible">True</property>
         <child>
-          <object class="GtkVBox" id="vbox2">
+          <object class="GtkVBox" id="vbox3">
             <property name="visible">True</property>
             <property name="orientation">vertical</property>
+            <property name="spacing">6</property>
             <child>
-              <object class="GtkHBox" id="hbox2">
+              <object class="GtkHBox" id="hbox5">
                 <property name="visible">True</property>
                 <child>
-                  <object class="GtkLabel" id="label2">
+                  <object class="GtkLabel" id="label3">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">Genres (13)</property>
+                    <property name="label" translatable="yes">Dance (1232)</property>
                   </object>
                   <packing>
                     <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="button1">
+                  <object class="GtkButton" id="button2">
                     <property name="label" translatable="yes">gtk-refresh</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -102,73 +166,12 @@
               </packing>
             </child>
             <child>
-              <object class="GtkTreeView" id="treeview2">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="model">liststore1</property>
-                <property name="search_column">0</property>
-              </object>
-              <packing>
-                <property name="position">1</property>
-              </packing>
+              <placeholder/>
             </child>
           </object>
           <packing>
-            <property name="position">1</property>
-          </packing>
-        </child>
-      </object>
-      <packing>
-        <property name="resize">False</property>
-        <property name="shrink">True</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkVBox" id="vbox3">
-        <property name="visible">True</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <object class="GtkHBox" id="hbox3">
-            <property name="visible">True</property>
-            <child>
-              <object class="GtkLabel" id="label3">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">Dance (1232)</property>
-              </object>
-              <packing>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="button2">
-                <property name="label" translatable="yes">gtk-refresh</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
+            <property name="padding">5</property>
             <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkTreeView" id="treeview3">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="model">liststore2</property>
-            <property name="search_column">0</property>
-          </object>
-          <packing>
-            <property name="position">1</property>
           </packing>
         </child>
       </object>
