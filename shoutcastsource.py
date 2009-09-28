@@ -69,7 +69,7 @@ class ShoutcastSource(rb.Source):
 
       self.add(main_vbox)
 
-      self.genresloader = XmlGenreLoader(self.db, self.cache_dir, self.entry_type_s)
+      self.genresloader = XmlGenresLoader(self.db, self.cache_dir, self.entry_type_s)
       self.genresloader.update()
 
   def filter_all_genres(self):
