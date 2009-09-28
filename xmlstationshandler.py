@@ -19,26 +19,27 @@ where:
 
 '''
 
-class XmlStationHandler(xml.sax.handler.ContentHandler):
+class XmlStationsHandler(xml.sax.handler.ContentHandler):
 
-	def __init__(self, db, entry_type):
-		xml.sax.handler.ContentHandler.__init__(self)
-		self.db = db
-		self.entry_type = entry_type
+  def __init__(self, db, entry_type, genre):
+    xml.sax.handler.ContentHandler.__init__(self)
+    self.db = db
+    self.entry_type = entry_type
+    self.genre = genre
 
-	def startElement(self, name, attrs):
-		self.attrs = attrs
+  def startElement(self, name, attrs):
+    self.attrs = attrs
 
-	def endElement(self, name):
-		if name == 'station':
-			track_url = 'http://yp.shoutcast.com/sbin/tunein-station.pls?id=%d' % attrs['id']
-
-			entry = self.__db.entry_lookup_by_location (track_url)
-			if entry == None:
-				entry = self.__db.entry_new(self.__entry_type, track_url)
-
-			self.db.set(entry, rhythmdb.PROP_TITLE, self.attrs['name'])
-			self.db.set(entry, rhythmdb.PROP_GENRE, self.attrs['genre'])
-			self.db.entry_keyword_add(entry, 'new')
-
-			self.db.commit()
+  def endElement(self, name):
+    if name == 'station':
+    	track_url = 'http://yp.shoutcast.com/sbin/tunein-station.pls?id=%d' % int(self.attrs['id'])
+    
+    	entry = self.db.entry_lookup_by_location (track_url)
+    	if entry == None:
+    		entry = self.db.entry_new(self.entry_type, track_url)
+    
+    	self.db.set(entry, rhythmdb.PROP_TITLE, self.attrs['name'])
+    	self.db.set(entry, rhythmdb.PROP_GENRE, self.genre)
+    	self.db.entry_keyword_add(entry, 'new')
+    
+    	self.db.commit()
