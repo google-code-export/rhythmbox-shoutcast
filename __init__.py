@@ -31,23 +31,21 @@ class Shoutcast(rb.Plugin):
     self.entry_type_g.can_sync_metadata = True
     self.entry_type_g.sync_metadata = None
     self.entry_type_g.save_to_disk = True
-    self.entry_type_g.category = rhythmdb.ENTRY_CONTAINER
+    self.entry_type_g.category = rhythmdb.ENTRY_VIRTUAL
     
     self.entry_type_s = self.db.entry_register_type("ShoutcastStationsEntryType")
     self.entry_type_s.can_sync_metadata = True
     self.entry_type_s.sync_metadata = None
     self.entry_type_s.save_to_disk = True
-    self.entry_type_s.category = rhythmdb.ENTRY_CONTAINER
+    self.entry_type_s.category = rhythmdb.ENTRY_VIRTUAL
     
-    theme = gtk.icon_theme_get_default()
-    rb.append_plugin_source_path(theme, "/icons")
-
     width, height = gtk.icon_size_lookup(gtk.ICON_SIZE_LARGE_TOOLBAR)
-    icon = rb.try_load_icon(theme, "shoutcast", width, 0)
+    icon = gtk.gdk.pixbuf_new_from_file_at_size(self.find_file("shoutcast.png"), width, height)
 
     self.source = gobject.new (ShoutcastSource,
                    					   shell = self.shell,
                    					   plugin = self,
+                               icon = icon,
                                entry_type = self.entry_type_s,
                                entry_type_g = self.entry_type_g,
                                source_group = group)
