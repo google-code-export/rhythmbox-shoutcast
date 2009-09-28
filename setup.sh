@@ -19,11 +19,11 @@
 # gedit plugin directory
 DEST=~/.gnome2/rhythmbox/plugins/shoutcast/
 
+# remove currect version of plugin
+rm -rf ${DEST}
+
 # create it
 mkdir -p ${DEST}
 
-# remove currect version of plugin
-rm -rf ${DEST}/shoutcast/
-
 # install currect verion of plugin
-cp -rv *.{glade,py,rb-plugin} ${DEST}
+cp -rv *.{glade,png,py,rb-plugin} ${DEST}
