@@ -3,7 +3,7 @@ import gobject
 import os
 import gtk
 
-from xmlgenreloader import XmlGenreLoader
+from xmlgenresloader import XmlGenresLoader
 from xmlstationsloader import XmlStationsLoader
 
 class ShoutcastSource(rb.Source):
