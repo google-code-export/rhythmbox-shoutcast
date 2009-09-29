@@ -48,8 +48,7 @@ class ShoutcastSource(rb.Source):
       self.builder.add_from_file(os.path.join(self.plugin.find_file('shoutcast.glade')))
 
       self.genres_list = rb.PropertyView(self.db, rhythmdb.PROP_GENRE, _("Genres"))
-      self.filter_all_genres()
-      #self.genres_list.connect('entry-activated')
+      self.filter_genres_default_query()
       self.genres_list.connect('property-selected', self.genres_property_selected)
       self.genres_list.connect('property-selection-reset', self.genres_property_selection_reset)
       self.genres_list.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
@@ -69,12 +68,20 @@ class ShoutcastSource(rb.Source):
 
       self.add(main_vbox)
 
-      self.genresloader = XmlGenresLoader(self.db, self.cache_dir, self.entry_type_s)
+      self.genresloader = XmlGenresLoader(self.db, self.cache_dir, self.entry_type_g)
       self.genresloader.update()
+      
+      self.shell.get_player().connect('playing-source-changed', self.playing_source_changed)
 
-  def filter_all_genres(self):
+  def do_impl_get_entry_view(self):
+    return self.stations_list
+
+  def playing_source_changed(self, s1, s2):
+    print "asdfasdf"
+
+  def filter_genres_default_query(self):
       genres_query = self.db.query_new()
-      self.db.query_append(genres_query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type_s))
+      self.db.query_append(genres_query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type_g))
       genres_query_model = self.db.query_model_new_empty ()
       self.db.do_full_query_parsed(genres_query_model, genres_query)
       genres_props_model = self.genres_list.get_model()
@@ -88,13 +95,13 @@ class ShoutcastSource(rb.Source):
 
   def filter_by_genre(self, genre):
       self.stations_query = self.db.query_new()
-      self.db.query_append(self.stations_query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type_g))
+      self.db.query_append(self.stations_query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type_s))
       self.db.query_append(self.stations_query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_GENRE, genre))
       self.stations_query_model = self.db.query_model_new_empty ()
       self.db.do_full_query_parsed(self.stations_query_model, self.stations_query)
       self.stations_list.set_model(self.stations_query_model)
 
-      self.stationsloader = XmlStationsLoader(self.db, self.cache_dir, self.entry_type_g, genre)
+      self.stationsloader = XmlStationsLoader(self.db, self.cache_dir, self.entry_type_s, genre)
       self.stationsloader.update()
 
   def genres_property_selected(self, view, name):
@@ -112,6 +119,7 @@ class ShoutcastSource(rb.Source):
       self.activated = True
       self.create()
 
+    self.shell.get_player().set_property('source', self.stations_list)
     rb.Source.do_impl_activate (self)
 
 gobject.type_register(ShoutcastSource)

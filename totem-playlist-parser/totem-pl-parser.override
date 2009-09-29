@@ -1,0 +1,12 @@
+%%
+headers
+#include "pygobject.h"
+#include "totem-pl-parser.h"
+%%
+modulename totem_pl_parser
+%%
+import gobject.GObject as PyGObject_Type
+%%
+ignore-glob
+  *_get_type
+  *_quark

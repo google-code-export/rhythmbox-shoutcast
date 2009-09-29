@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#
+# http://www.ibm.com/developerworks/linux/library/l-wrap/
+# http://faq.pygtk.org/index.py?req=show&file=faq19.017.htp
+#
+
+python /usr/share/pygobject/2.0/codegen/h2def.py /usr/include/totem-pl-parser/1/plparser/totem-pl-parser.h > totem-pl-parser.def
+

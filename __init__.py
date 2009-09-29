@@ -37,7 +37,7 @@ class Shoutcast(rb.Plugin):
     self.entry_type_s.can_sync_metadata = True
     self.entry_type_s.sync_metadata = None
     self.entry_type_s.save_to_disk = True
-    self.entry_type_s.category = rhythmdb.ENTRY_VIRTUAL
+    self.entry_type_s.category = rhythmdb.ENTRY_STREAM
     
     width, height = gtk.icon_size_lookup(gtk.ICON_SIZE_LARGE_TOOLBAR)
     icon = gtk.gdk.pixbuf_new_from_file_at_size(self.find_file("shoutcast.png"), width, height)
