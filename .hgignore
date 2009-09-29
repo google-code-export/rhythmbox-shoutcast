@@ -1,0 +1,7 @@
+
+syntax: regexp
+^totem-playlist-parser/totem-pl-parser\.c$
+syntax: regexp
+\.so$
+syntax: regexp
+\.o$
