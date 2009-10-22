@@ -1,8 +1,9 @@
 #include <pygobject.h>
 
+extern PyMethodDef totem_pl_parser_functions[];
+
 void totem_pl_parser_add_constants(PyObject *module, const gchar *strip_prefix);
 void totem_pl_parser_register_classes(PyObject *d);
-extern PyMethodDef totem_pl_parser_functions[];
 
 DL_EXPORT(void) inittotem_pl_parser(void)
 {
@@ -20,4 +21,3 @@ DL_EXPORT(void) inittotem_pl_parser(void)
 
   totem_pl_parser_add_constants(m, "");
 }
-
