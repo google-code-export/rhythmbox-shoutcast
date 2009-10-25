@@ -5,6 +5,7 @@ import gtk
 
 from xmlgenresloader import XmlGenresLoader
 from xmlstationsloader import XmlStationsLoader
+from rbsearchentry import RBSearchEntry
 
 class ShoutcastSource(rb.Source):
 
@@ -44,15 +45,17 @@ class ShoutcastSource(rb.Source):
 
       self.entry_type_s = self.get_property('entry-type')
 
-      self.builder = gtk.Builder()
-      self.builder.add_from_file(os.path.join(self.plugin.find_file('shoutcast.glade')))
-
+      self.vbox_main = gtk.VPaned()
+      
+      self.search_box = RBSearchEntry()
+      
       self.genres_list = rb.PropertyView(self.db, rhythmdb.PROP_GENRE, _("Genres"))
-      self.filter_genres_default_query()
       self.genres_list.connect('property-selected', self.genres_property_selected)
       self.genres_list.connect('property-selection-reset', self.genres_property_selection_reset)
       self.genres_list.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
       self.genres_list.set_shadow_type(gtk.SHADOW_IN)
+
+      self.filter_genres_default_query()
       
       self.stations_list = rb.EntryView(self.db, self.shell.get_player(), None, False, False)
       self.stations_list.append_column(rb.ENTRY_VIEW_COL_TITLE, True)
@@ -60,13 +63,16 @@ class ShoutcastSource(rb.Source):
       self.stations_list.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
       self.stations_list.set_shadow_type(gtk.SHADOW_IN)
 
-      self.builder.get_object('vbox2').pack_start(self.genres_list)
-      self.builder.get_object('vbox3').pack_start(self.stations_list)
+      vbox_1 = gtk.VBox()
+      vbox_1.pack_start(self.search_box)
+      vbox_1.pack_start(self.genres_list)
 
-      main_vbox = self.builder.get_object('main_vbox')
-      main_vbox.show_all()
+      self.vbox_main.add1(vbox_1)
+      self.vbox_main.add2(self.stations_list)
 
-      self.add(main_vbox)
+      self.vbox_main.show_all()
+
+      self.add(self.vbox_main)
 
       self.genresloader = XmlGenresLoader(self.db, self.cache_dir, self.entry_type_g)
       self.genresloader.update()
@@ -77,7 +83,7 @@ class ShoutcastSource(rb.Source):
     return self.stations_list
 
   def playing_source_changed(self, s1, s2):
-    print "asdfasdf"
+    pass
 
   def filter_genres_default_query(self):
       genres_query = self.db.query_new()
@@ -119,7 +125,6 @@ class ShoutcastSource(rb.Source):
       self.activated = True
       self.create()
 
-    self.shell.get_player().set_property('source', self.stations_list)
     rb.Source.do_impl_activate (self)
 
 gobject.type_register(ShoutcastSource)
