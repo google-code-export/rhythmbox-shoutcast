@@ -1,4 +1,4 @@
-import totem_pl_parser
+import totem_py_parser
 
 def pl_entry(parser, uri, htable):
   print 'uri: ' + uri
@@ -6,7 +6,7 @@ def pl_entry(parser, uri, htable):
   print 'genre: ' + htable.lookup('genre').__str__()
 
 def parse_uri(uri):
-  parser = totem_pl_parser.TotemPyParser()
+  parser = totem_py_parser.TotemPyParser()
   parser.connect('entry-py-parsed', pl_entry)
   #g_object_set (parser, "recurse", FALSE, NULL);
 
