@@ -10,8 +10,14 @@ from rbsearchentry import RBSearchEntry
 class ShoutcastSource(rb.Source):
 
   __gproperties__ = {
-                     'plugin': (rb.Plugin, 'plugin', 'plugin', gobject.PARAM_WRITABLE | gobject.PARAM_CONSTRUCT_ONLY),
-                     'entry_type_g': (rhythmdb.EntryType, 'entry_type_g', 'entry_type_g', gobject.PARAM_WRITABLE | gobject.PARAM_CONSTRUCT_ONLY),
+                     'plugin': (rb.Plugin,
+                                'plugin',
+                                'plugin',
+                                gobject.PARAM_WRITABLE | gobject.PARAM_CONSTRUCT_ONLY),
+                     'entry_type_g': (rhythmdb.EntryType,
+                                'entry_type_g',
+                                'entry_type_g',
+                                gobject.PARAM_WRITABLE | gobject.PARAM_CONSTRUCT_ONLY),
   }
   
   db = None
@@ -92,7 +98,6 @@ class ShoutcastSource(rb.Source):
       self.db.do_full_query_parsed(genres_query_model, genres_query)
       genres_props_model = self.genres_list.get_model()
       genres_props_model.set_property('query-model', genres_query_model)
-
 
   def filter_by_genre_clear(self):
       self.stations_query = self.db.query_new()
