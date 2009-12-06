@@ -77,8 +77,8 @@ void totem_py_parser_init(TotemPyParser *parser)
 }
 
 void totem_py_parser_entry_parsed(TotemPlParser *parser, const char *uri,
-		GHashTable* metadata, TotemPyParser* py_parser) {
-
+		GHashTable* metadata, TotemPyParser* py_parser)
+{
 	TotemHashTable *h = totem_hash_table_new(metadata);
 
 	g_signal_emit(G_OBJECT(py_parser),
@@ -87,8 +87,8 @@ void totem_py_parser_entry_parsed(TotemPlParser *parser, const char *uri,
 }
 
 void totem_py_parser_playlist_started(TotemPlParser *parser, const char *uri,
-		GHashTable* metadata, TotemPyParser* py_parser) {
-
+		GHashTable* metadata, TotemPyParser* py_parser)
+{
 	TotemHashTable *h = totem_hash_table_new(metadata);
 
 	g_signal_emit(G_OBJECT(parser),
@@ -97,8 +97,8 @@ void totem_py_parser_playlist_started(TotemPlParser *parser, const char *uri,
 }
 
 void totem_py_parser_playlist_end(TotemPlParser *parser,
-		const char *playlist_uri, TotemPyParser* py_parser) {
-
+		const char *playlist_uri, TotemPyParser* py_parser)
+{
 	g_signal_emit(G_OBJECT(parser),
 			totem_py_parser_table_signals[PLAYLIST_ENDED], 0, playlist_uri);
 }
