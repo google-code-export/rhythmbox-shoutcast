@@ -7,7 +7,7 @@ from xmlgenresloader import XmlGenresLoader
 from xmlstationsloader import XmlStationsLoader
 from rbsearchentry import RBSearchEntry
 
-class ShoutcastSource(rb.Source):
+class ShoutcastSource(rb.StreamingSource):
 
   __gproperties__ = {
                      'plugin': (rb.Plugin,
