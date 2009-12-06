@@ -5,7 +5,7 @@ LDFLAGS = `pkg-config --libs gtk+-2.0 pygtk-2.0 totem-plparser`
 all: totem_pl_parser.so
 
 # Build the shared objects
-totem_pl_parser.so: totem-pl-parser.o totem-pl-parser-module.o
+totem_pl_parser.so: totem-pl-parser.o totem-pl-parser-module.o totem-py-parser.o totem-py-parser-marshal.o totem-hash-table.o
 	$(CC) $(LDFLAGS) -shared $^ -o $@
 
 DEFS=`pkg-config --variable=defsdir pygtk-2.0`
@@ -20,3 +20,4 @@ totem-pl-parser.c: totem-pl-parser.def totem-pl-parser.override
 clean:
 	rm -f totem-pl-parser.c
 	rm -f totem_pl_parser.so
+	rm -f *.o
