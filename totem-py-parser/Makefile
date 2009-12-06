@@ -1,3 +1,5 @@
+# Copyright (C) 2009  Alexey Kuznetsov <ak@axet.ru>
+
 PYTHONVER = `python -c 'import sys; print sys.version[:3]'`
 CFLAGS = `pkg-config --cflags gtk+-2.0 pygtk-2.0 totem-plparser` -fPIC -I/usr/include/python$(PYTHONVER) -I.
 LDFLAGS = `pkg-config --libs gtk+-2.0 pygtk-2.0 totem-plparser`

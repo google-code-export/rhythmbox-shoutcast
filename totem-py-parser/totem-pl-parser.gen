@@ -1,4 +1,5 @@
 #!/bin/bash
+# Copyright (C) 2009  Alexey Kuznetsov <ak@axet.ru>
 
 #
 # http://www.ibm.com/developerworks/linux/library/l-wrap/
