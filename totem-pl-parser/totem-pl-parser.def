@@ -37,91 +37,13 @@
   )
 )
 
-
-;; From totem-pl-parser.h
-
-(define-function totem_pl_parser_error_quark
-  (c-name "totem_pl_parser_error_quark")
-  (return-type "GQuark")
-)
-
-(define-function totem_pl_parser_get_type
-  (c-name "totem_pl_parser_get_type")
-  (return-type "GType")
-)
-
-(define-function totem_pl_parser_parse_duration
-  (c-name "totem_pl_parser_parse_duration")
-  (return-type "gint64")
-  (parameters
-    '("const-char*" "duration")
-    '("gboolean" "debug")
-  )
-)
-
-(define-function totem_pl_parser_parse_date
-  (c-name "totem_pl_parser_parse_date")
-  (return-type "guint64")
-  (parameters
-    '("const-char*" "date_str")
-    '("gboolean" "debug")
-  )
-)
-
-; added manualy
+;; TotemPlParser
 
 (define-object TotemPlParser
   (in-module "Totem")
   (parent "GObject")
   (c-name "TotemPlParser")
   (gtype-id "TOTEM_TYPE_PL_PARSER")
-)
-
-(define-method write
-  (of-object "TotemPlParser")
-  (c-name "totem_pl_parser_write")
-  (return-type "gboolean")
-  (parameters
-    '("GtkTreeModel*" "model")
-    '("TotemPlParserIterFunc" "func")
-    '("const-char*" "output")
-    '("TotemPlParserType" "type")
-    '("gpointer" "user_data")
-    '("GError**" "error")
-  )
-)
-
-(define-method write_with_title
-  (of-object "TotemPlParser")
-  (c-name "totem_pl_parser_write_with_title")
-  (return-type "gboolean")
-  (parameters
-    '("GtkTreeModel*" "model")
-    '("TotemPlParserIterFunc" "func")
-    '("const-char*" "output")
-    '("const-char*" "title")
-    '("TotemPlParserType" "type")
-    '("gpointer" "user_data")
-    '("GError**" "error")
-  )
-)
-
-(define-method add_ignored_scheme
-  (of-object "TotemPlParser")
-  (c-name "totem_pl_parser_add_ignored_scheme")
-  (return-type "none")
-  (parameters
-    '("const-char*" "scheme")
-  )
-)
-
-(define-method add_ignored_mimetype
-  (of-object "TotemPlParser")
-  (c-name "totem_pl_parser_add_ignored_mimetype")
-  (return-type "none")
-  (parameters
-    '("const-char*" "mimetype")
-  )
 )
 
 (define-method parse
@@ -134,26 +56,51 @@
   )
 )
 
-(define-method parse_with_base
-  (of-object "TotemPlParser")
-  (c-name "totem_pl_parser_parse_with_base")
-  (return-type "TotemPlParserResult")
-  (parameters
-    '("const-char*" "uri")
-    '("const-char*" "base")
-    '("gboolean" "fallback")
-  )
-)
-
 (define-function totem_pl_parser_new
   (c-name "totem_pl_parser_new")
   (is-constructor-of "TotemPlParser")
   (return-type "TotemPlParser*")
 )
 
-(define-function totem_pl_parser_metadata_get_type
-  (c-name "totem_pl_parser_metadata_get_type")
-  (return-type "GType")
+;; TotemPyParser
+
+(define-object TotemPyParser
+  (in-module "Totem")
+  (parent "TotemPlParser")
+  (c-name "TotemPyParser")
+  (gtype-id "TOTEM_TYPE_PY_PARSER")
 )
 
+(define-method parse
+  (of-object "TotemPyParser")
+  (c-name "totem_py_parser_parse")
+  (return-type "TotemPlParserResult")
+  (parameters
+    '("const-char*" "uri")
+    '("gboolean" "fallback")
+  )
+)
 
+(define-function totem_py_parser_new
+  (c-name "totem_py_parser_new")
+  (is-constructor-of "TotemPyParser")
+  (return-type "TotemPyParser*")
+)
+
+;; TotemHashTable
+
+(define-object TotemHashTable
+  (in-module "Totem")
+  (parent "GObject")
+  (c-name "TotemHashTable")
+  (gtype-id "TOTEM_TYPE_HASH_TABLE")
+)
+
+(define-method lookup
+  (of-object "TotemHashTable")
+  (c-name "totem_hash_table_lookup")
+  (return-type "const-char*")
+  (parameters
+    '("const-char*" "key")
+  )
+)

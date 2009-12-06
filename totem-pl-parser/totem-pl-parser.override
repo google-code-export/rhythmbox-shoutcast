@@ -2,6 +2,8 @@
 headers
 #include "pygobject.h"
 #include "totem-pl-parser.h"
+#include "totem-py-parser.h"
+#include "totem-hash-table.h"
 %%
 modulename totem_pl_parser
 %%
