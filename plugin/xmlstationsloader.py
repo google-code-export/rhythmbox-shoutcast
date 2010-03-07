@@ -11,9 +11,48 @@ class XmlStationsLoader(XmlLoader):
   def __init__(self, db, cache_dir, entry_type, genre):
     self.db = db
     self.entry_type = entry_type
+    self.genre = genre
 
     self.file_dir = cache_dir
     self.file_local = os.path.join(cache_dir, 'stations-%s.xml' % genre)
     self.file_local_temp = self.file_local + '.tmp'
     self.file_url = 'http://yp.shoutcast.com/sbin/newxml.phtml?genre=%s' % genre
     self.xml_handler = XmlStationsHandler(self.db, self.entry_type, genre)
+
+  def clean_keywords(self):
+    query = self.db.query_new()
+    self.db.query_append(query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type))
+    self.db.query_append(query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_GENRE, self.genre))
+    self.db.query_append(query, (rhythmdb.QUERY_PROP_LIKE, rhythmdb.PROP_KEYWORD, "station"))
+
+    query_model = self.db.query_model_new_empty()
+    self.db.do_full_query_parsed(query_model, query)
+    
+    query_model.foreach(self.clean_keywords_db)
+
+  def clean_keywords_db(self, query_model, path, iter):
+    entry = query_model.tree_path_to_entry(path)
+    
+    self.db.entry_keyword_add(entry, 'old')
+
+    return True
+    
+  def remove_old(self):
+    query = self.db.query_new()
+    self.db.query_append(query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type))
+    self.db.query_append(query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_GENRE, self.genre))
+    self.db.query_append(query, (rhythmdb.QUERY_PROP_LIKE, rhythmdb.PROP_KEYWORD, "station"))
+    self.db.query_append(query, (rhythmdb.QUERY_PROP_LIKE, rhythmdb.PROP_KEYWORD, 'old'))
+    self.db.query_append(query, (rhythmdb.QUERY_PROP_NOT_LIKE, rhythmdb.PROP_KEYWORD, 'star'))
+
+    query_model = self.db.query_model_new_empty()
+    self.db.do_full_query_parsed(query_model, self.query)
+
+    query_model.gtk_tree_model_foreach(remove_keywords_db)
+
+  def remove_keywords_db(self, model, path, iter):
+    entry = model.tree_path_to_entry(path)
+
+    self.db.entry_remove(entry)
+    
+    return True

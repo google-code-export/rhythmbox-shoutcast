@@ -12,7 +12,7 @@ class XmlGenresHandler(xml.sax.handler.ContentHandler):
 		self.attrs = attrs
 
 	def endElement(self, name):
-		if name == "genre":
+	   if name == "genre":
 			track_url = 'http://yp.shoutcast.com/sbin/newxml.phtml?genre=%s' % self.attrs['name']
 
 			entry = self.db.entry_lookup_by_location (track_url)
@@ -20,6 +20,7 @@ class XmlGenresHandler(xml.sax.handler.ContentHandler):
 				entry = self.db.entry_new(self.entry_type, track_url)
 
 			self.db.set(entry, rhythmdb.PROP_GENRE, self.attrs['name'])
-			self.db.entry_keyword_add(entry, 'new')
+			self.db.entry_keyword_remove(entry, 'old')
+			self.db.entry_keyword_add(entry, 'genre')
 
 			self.db.commit()

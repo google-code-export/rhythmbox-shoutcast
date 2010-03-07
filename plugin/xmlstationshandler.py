@@ -32,14 +32,15 @@ class XmlStationsHandler(xml.sax.handler.ContentHandler):
 
   def endElement(self, name):
     if name == 'station':
-    	track_url = 'http://yp.shoutcast.com/sbin/tunein-station.pls?id=%d' % int(self.attrs['id'])
-    
-    	entry = self.db.entry_lookup_by_location (track_url)
-    	if entry == None:
-    		entry = self.db.entry_new(self.entry_type, track_url)
-    
-    	self.db.set(entry, rhythmdb.PROP_TITLE, self.attrs['name'])
-    	self.db.set(entry, rhythmdb.PROP_GENRE, self.genre)
-    	self.db.entry_keyword_add(entry, 'new')
-    
-    	self.db.commit()
+      track_url = 'http://yp.shoutcast.com/sbin/tunein-station.pls?id=%d' % int(self.attrs['id'])
+      
+      entry = self.db.entry_lookup_by_location (track_url)
+      if entry == None:
+      	entry = self.db.entry_new(self.entry_type, track_url)
+
+      self.db.set(entry, rhythmdb.PROP_TITLE, self.attrs['name'])
+      self.db.set(entry, rhythmdb.PROP_GENRE, self.genre)
+      self.db.entry_keyword_remove(entry, 'old')
+      self.db.entry_keyword_add(entry, 'station')
+      
+      self.db.commit()
