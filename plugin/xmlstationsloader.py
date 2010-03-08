@@ -40,7 +40,7 @@ class XmlStationsLoader(XmlLoader):
     
     self.db.entry_keyword_add(entry, 'old')
 
-    return True
+    return False
     
   def remove_old(self):
     query = self.db.query_new()
@@ -60,6 +60,6 @@ class XmlStationsLoader(XmlLoader):
   def remove_keywords_db(self, model, path, iter):
     entry = self.iter_to_entry(model, iter)
 
-    self.db.entry_remove(entry)
+    self.db.entry_delete(entry)
     
-    return True
+    return False

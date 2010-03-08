@@ -39,7 +39,7 @@ class XmlGenresLoader(XmlLoader):
     self.db.entry_keyword_add(entry, 'old')
     self.db.entry_keyword_remove(entry, 'new')
     
-    return True
+    return False
     
   def remove_old(self):
     query = self.db.query_new()
@@ -81,11 +81,11 @@ class XmlGenresLoader(XmlLoader):
     if query_model.get_size() == 0:
       self.db.entry_remove(entry)
     
-    return True
+    return False
 
   def remove_stations_db(self, model, path, iter, star):
     entry = self.iter_to_entry(model, iter)
 
     self.db.entry_remove(entry)
     
-    return True
+    return False

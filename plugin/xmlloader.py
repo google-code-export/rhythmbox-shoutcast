@@ -3,7 +3,7 @@ import xml.sax, xml.sax.handler
 import shutil
 import gobject
 import rb
-import os
+import os, time
 
 class XmlLoader:
 
@@ -43,23 +43,34 @@ class XmlLoader:
   def __init__(self):
     pass
   
-  def update(self):
+  # do update each 10 min only
+  def ready_to_update(self):
+    try:
+      (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(self.file_local)
+      return mtime + 10 * 60 * 60 < time.time()
+    except OSError:
+      return True
+
+  
+  def update(self):    
     self.clean_keywords()
     self.update_id = gobject.timeout_add(6 * 60 * 60 * 1000, self.update_catalogue)
     self.update_catalogue()
 
   def update_catalogue(self):
-    self.catalogue_check = rb.UpdateCheck()
-    self.catalogue_check.check_for_update(self.file_local, self.file_url, self.update_cb)
+    if self.ready_to_update():
+      self.catalogue_check = rb.UpdateCheck()
+      self.catalogue_check.check_for_update(self.file_local, self.file_url, self.update_cb)
+    else:
+      self.catalogue_load()
 
   def update_cb (self, result):
-      self.catalogue_check = None
-      
-      if result is True:
-    	self.catalogue_download()
-        
-      elif self.has_loaded is False:
-        self.catalogue_load()
+    self.catalogue_check = None
+    
+    if result is True:
+  	  self.catalogue_download()
+    elif self.has_loaded is False:
+      self.catalogue_load()
 
   def catalogue_download(self):
     self.updating = True
