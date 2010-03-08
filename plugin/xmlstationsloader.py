@@ -19,6 +19,9 @@ class XmlStationsLoader(XmlLoader):
     self.file_url = 'http://yp.shoutcast.com/sbin/newxml.phtml?genre=%s' % genre
     self.xml_handler = XmlStationsHandler(self.db, self.entry_type, genre)
 
+  def iter_to_entry(self, model, iter):
+    return model.get(iter, 0)[0]
+
   def clean_keywords(self):
     query = self.db.query_new()
     self.db.query_append(query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type))
@@ -29,9 +32,11 @@ class XmlStationsLoader(XmlLoader):
     self.db.do_full_query_parsed(query_model, query)
     
     query_model.foreach(self.clean_keywords_db)
+    
+    self.db.commit()
 
   def clean_keywords_db(self, query_model, path, iter):
-    entry = query_model.tree_path_to_entry(path)
+    entry = self.iter_to_entry(query_model, iter)
     
     self.db.entry_keyword_add(entry, 'old')
 
@@ -46,12 +51,14 @@ class XmlStationsLoader(XmlLoader):
     self.db.query_append(query, (rhythmdb.QUERY_PROP_NOT_LIKE, rhythmdb.PROP_KEYWORD, 'star'))
 
     query_model = self.db.query_model_new_empty()
-    self.db.do_full_query_parsed(query_model, self.query)
+    self.db.do_full_query_parsed(query_model, query)
 
-    query_model.gtk_tree_model_foreach(remove_keywords_db)
+    query_model.foreach(self.remove_keywords_db)
+    
+    self.db.commit()
 
   def remove_keywords_db(self, model, path, iter):
-    entry = model.tree_path_to_entry(path)
+    entry = self.iter_to_entry(model, iter)
 
     self.db.entry_remove(entry)
     
