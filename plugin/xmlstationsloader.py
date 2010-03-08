@@ -5,6 +5,7 @@ import os
 
 from xmlloader import XmlLoader
 from xmlstationshandler import XmlStationsHandler
+from db import *
 
 class XmlStationsLoader(XmlLoader):
 
@@ -29,11 +30,10 @@ class XmlStationsLoader(XmlLoader):
     self.db.do_full_query_parsed(query_model, query)
     
     query_model.foreach(self.clean_keywords_db)
-    
     self.db.commit()
 
   def clean_keywords_db(self, query_model, path, iter):
-    entry = self.iter_to_entry(query_model, iter)
+    entry = iter_to_entry(self.db, query_model, iter)
     
     self.db.entry_keyword_add(entry, 'old')
 
@@ -46,16 +46,16 @@ class XmlStationsLoader(XmlLoader):
     self.db.query_append(query, (rhythmdb.QUERY_PROP_LIKE, rhythmdb.PROP_KEYWORD, "station"))
     self.db.query_append(query, (rhythmdb.QUERY_PROP_LIKE, rhythmdb.PROP_KEYWORD, 'old'))
     self.db.query_append(query, (rhythmdb.QUERY_PROP_NOT_LIKE, rhythmdb.PROP_KEYWORD, 'star'))
-
     query_model = self.db.query_model_new_empty()
     self.db.do_full_query_parsed(query_model, query)
 
     query_model.foreach(self.remove_keywords_db)
-    
     self.db.commit()
 
   def remove_keywords_db(self, model, path, iter):
-    entry = self.iter_to_entry(model, iter)
+    entry = iter_to_entry(self.db, model, iter)
+
+    entry_to_string(entry)
 
     self.db.entry_delete(entry)
     

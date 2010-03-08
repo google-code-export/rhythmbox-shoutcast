@@ -47,16 +47,6 @@ class XmlLoader:
   
   def __init__(self):
     pass
-  
-  def iter_to_entry(self, model, iter):
-    id = model.get(iter, 0)[0]
-    return self.db.entry_lookup_by_id(self.db.entry_get (id, rhythmdb.PROP_ENTRY_ID))
-
-  def entry_to_string(self, entry):
-    print "id: " + repr(self.db.entry_get(entry, rhythmdb.PROP_ENTRY_ID))
-    print "title: " + repr(self.db.entry_get(entry, rhythmdb.PROP_TITLE))
-    print "genre: " + repr(self.db.entry_get(entry, rhythmdb.PROP_GENRE))
-    print "url: " + repr(self.db.entry_get(entry, rhythmdb.PROP_LOCATION))
 
   def set_callback(self, callback):
     self.callback = callback
@@ -118,12 +108,12 @@ class XmlLoader:
     
     if os.path.exists(self.file_dir) is False:
       os.mkdir(self.file_dir, 0700)
-      
+
     print self.file_local_temp
     out = open(self.file_local_temp, 'w')
 
     self.catalogue_loader = rb.ChunkLoader()
-    self.catalogue_loader.get_url_chunks(self.file_url, 4 * 1024, True, self.catalogue_download_chunk_cb, out)
+    self.catalogue_loader.get_url_chunks(self.file_url, 1 * 1024, True, self.catalogue_download_chunk_cb, out)
 
   def catalogue_download_chunk_close(self, out):
     self.updating = False
@@ -149,6 +139,7 @@ class XmlLoader:
         self.load_current_size += len(result)
         self.load_total_size = total
     except Exception as e:
+      os.remove(self.file_local)
       self.error(e)
 
     self.notify_status_changed()
@@ -161,7 +152,7 @@ class XmlLoader:
     parser.setContentHandler(self.xml_handler)
     
     self.catalogue_loader = rb.ChunkLoader()
-    self.catalogue_loader.get_url_chunks(self.file_local, 64 * 1024, True, self.catalogue_load_chunk_cb, parser)
+    self.catalogue_loader.get_url_chunks(self.file_local, 1 * 1024, True, self.catalogue_load_chunk_cb, parser)
 
   def catalogue_load_chunk_close(self, parser):
     parser.close()

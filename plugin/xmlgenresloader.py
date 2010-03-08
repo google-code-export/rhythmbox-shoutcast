@@ -5,6 +5,8 @@ import os, os.path
 
 from xmlloader import XmlLoader
 from xmlgenreshandler import XmlGenresHandler
+from db import *
+from debug import *
 
 class XmlGenresLoader(XmlLoader):
 
@@ -29,7 +31,7 @@ class XmlGenresLoader(XmlLoader):
     self.db.commit()
 
   def clean_keywords_db(self, model, path, iter):
-    entry = self.iter_to_entry(model, iter)
+    entry = iter_to_entry(self.db, model, iter)
     
     self.db.entry_keyword_add(entry, 'old')
 
@@ -47,10 +49,10 @@ class XmlGenresLoader(XmlLoader):
     self.db.commit()
 
   def remove_old_db(self, model, path, iter):
-    entry = self.iter_to_entry(model, iter)
+    entry = iter_to_entry(self.db, model, iter)
 
     genre = self.db.entry_get(entry, rhythmdb.PROP_GENRE)
-
+    
     query = self.db.query_new()
     self.db.query_append(query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type))
     self.db.query_append(query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_GENRE, genre))
@@ -63,7 +65,7 @@ class XmlGenresLoader(XmlLoader):
     # remove 'genre' only if here no favorite stations left
     if stars_amount == 0:
       print "Remove old genre's: " + genre
-      self.entry_to_string(entry)
+      entry_to_string(self.db, entry)
       self.db.entry_delete(entry)
 
     query = self.db.query_new()
@@ -78,10 +80,7 @@ class XmlGenresLoader(XmlLoader):
     return False
 
   def remove_stations_db(self, model, path, iter):
-    entry = self.iter_to_entry(model, iter)
-
-    print "remove station entry: "
-    self.entry_to_string(entry)
+    entry = iter_to_entry(self.db, model, iter)
 
     self.db.entry_delete(entry)
     

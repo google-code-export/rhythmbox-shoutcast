@@ -13,13 +13,18 @@ class XmlGenresHandler(xml.sax.handler.ContentHandler):
 
   def endElement(self, name):
     if name == "genre":
-      track_url = 'http://yp.shoutcast.com/sbin/newxml.phtml?genre=%s' % self.attrs['name']
       
       genre = self.attrs['name']
+      
+      track_url = 'http://yp.shoutcast.com/sbin/newxml.phtml?genre=%s' % genre
       
       entry = self.db.entry_lookup_by_location(track_url)
       if entry == None:
       	entry = self.db.entry_new(self.entry_type, track_url)
+
+        if not entry:
+          raise Exception('Unable to add entry to database')
+        
         print "New genre: " + genre
 
       self.db.set(entry, rhythmdb.PROP_GENRE, genre)

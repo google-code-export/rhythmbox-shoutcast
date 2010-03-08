@@ -8,6 +8,8 @@ from xmlstationsloader import XmlStationsLoader
 from genreview import GenreView
 from loadmanager import LoadManager
 
+from debug import *
+
 class ShoutcastSource(rb.StreamingSource):
 
   __gproperties__ = {
