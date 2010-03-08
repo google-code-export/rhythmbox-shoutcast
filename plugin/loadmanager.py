@@ -1,9 +1,9 @@
-from collections import deque
 import gobject
 
 class LoadManager:
   
-  stack = deque()
+  stack = []
+  xmlloader = None
   notify_id = 0
   
   def __init__(self):
@@ -16,16 +16,18 @@ class LoadManager:
     self.notify_status_changed()
     
   def checkstatus(self):
-    if self.stack.__len__() > 0:
-      xmlloader = self.stack[0]
-      
-      if xmlloader.fresh():
-        xmlloader.update()
+    if self.xmlloader:
+      if self.xmlloader.fresh():
+        self.xmlloader.update()
         self.notify_status_changed()
       
-      if xmlloader.done():
-        self.stack.popleft()
-        self.notify_status_changed()    
+      if self.xmlloader.done():
+        self.xmlloader = None
+        self.notify_status_changed()
+            
+    elif self.stack.__len__() > 0:
+      self.xmlloader = self.stack.pop()
+      self.notify_status_changed()    
     
   def notify_status_changed(self):  
     if self.notify_id == 0:
