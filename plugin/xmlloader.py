@@ -40,6 +40,7 @@ class XmlLoader:
   # gtk id
   notify_id = 0
   
+  # exception / error text message
   result = None
   
   callback = None
@@ -47,6 +48,16 @@ class XmlLoader:
   def __init__(self):
     pass
   
+  def iter_to_entry(self, model, iter):
+    id = model.get(iter, 0)[0]
+    return self.db.entry_lookup_by_id(self.db.entry_get (id, rhythmdb.PROP_ENTRY_ID))
+
+  def entry_to_string(self, entry):
+    print "id: " + repr(self.db.entry_get(entry, rhythmdb.PROP_ENTRY_ID))
+    print "title: " + repr(self.db.entry_get(entry, rhythmdb.PROP_TITLE))
+    print "genre: " + repr(self.db.entry_get(entry, rhythmdb.PROP_GENRE))
+    print "url: " + repr(self.db.entry_get(entry, rhythmdb.PROP_LOCATION))
+
   def set_callback(self, callback):
     self.callback = callback
   
@@ -54,6 +65,9 @@ class XmlLoader:
     return self.update_id == None
   
   def done(self):
+    if self.result:
+      return True
+    
     if self.catalogue_check:
       return False
     
@@ -66,11 +80,12 @@ class XmlLoader:
   def ready_to_update(self):
     try:
       (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(self.file_local)
-      return mtime + 10 * 60 < time.time()
+      return mtime + 10 * 60 * 60 < time.time()
     except OSError:
       return True
 
   def error(self, result):
+    print result
     self.result = result
   
   def update(self):    
@@ -86,14 +101,17 @@ class XmlLoader:
       self.catalogue_load()
 
   def update_cb (self, result):
-    self.catalogue_check = None
-    
-    if result is True:
-  	  self.catalogue_download()
-    elif self.has_loaded is False:
-      self.catalogue_load()
-    else:
-      self.error('update')
+    try:
+      self.catalogue_check = None
+      
+      if result is True:
+    	  self.catalogue_download()
+      elif self.has_loaded is False:
+        self.catalogue_load()
+      else:
+        self.error('update')
+    except Exception as e:
+      self.error(e)
 
   def catalogue_download(self):
     self.updating = True
@@ -108,26 +126,30 @@ class XmlLoader:
     self.catalogue_loader.get_url_chunks(self.file_url, 4 * 1024, True, self.catalogue_download_chunk_cb, out)
 
   def catalogue_download_chunk_close(self, out):
-    out.close()
-
-    shutil.move(self.file_local_temp, self.file_local)
     self.updating = False
     self.catalogue_loader = None
-    self.catalogue_load()
+    
+    out.close()
+    shutil.move(self.file_local_temp, self.file_local)
+    print self.file_local
 
   def catalogue_download_chunk_cb (self, result, total, out):
-    if not result:
-      self.catalogue_download_chunk_close(out)
-      
-    elif isinstance(result, Exception):
-      self.catalogue_download_chunk_close(out)
-      
-      self.error(result)
-     
-    else:
-      out.write(result)
-      self.load_current_size += len(result)
-      self.load_total_size = total
+    try:
+      if not result:
+        self.catalogue_download_chunk_close(out)
+        self.catalogue_load()
+        
+      elif isinstance(result, Exception):
+        self.catalogue_download_chunk_close(out)
+        os.remove(self.file_local)
+        self.error(result)
+       
+      else:
+        out.write(result)
+        self.load_current_size += len(result)
+        self.load_total_size = total
+    except Exception as e:
+      self.error(e)
 
     self.notify_status_changed()
 
@@ -147,22 +169,26 @@ class XmlLoader:
     self.updating = False
     self.catalogue_loader = None
     
-    self.remove_old();
+    self.db.commit()
+    
+    self.remove_old()
 
   def catalogue_load_chunk_cb(self, result, total, parser):
-    if not result:
-      self.catalogue_load_chunk_close(parser)
-            
-    elif isinstance(result, Exception):
-      self.catalogue_load_chunk_close(parser)
-
-      self.error(result)
-      
-    else:
-      parser.feed(result)
-      
-      self.load_current_size += len(result)
-      self.load_total_size = total
+    try:
+      if not result:
+        self.catalogue_load_chunk_close(parser)
+              
+      elif isinstance(result, Exception):
+        self.error(result)
+        self.catalogue_load_chunk_close(parser)
+        
+      else:
+        parser.feed(result)
+        
+        self.load_current_size += len(result)
+        self.load_total_size = total
+    except Exception as e:
+      self.error(e)
 
     self.notify_status_changed()
 

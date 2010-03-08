@@ -19,9 +19,6 @@ class XmlStationsLoader(XmlLoader):
     self.file_url = 'http://yp.shoutcast.com/sbin/newxml.phtml?genre=%s' % genre
     self.xml_handler = XmlStationsHandler(self.db, self.entry_type, genre)
 
-  def iter_to_entry(self, model, iter):
-    return model.get(iter, 0)[0]
-
   def clean_keywords(self):
     query = self.db.query_new()
     self.db.query_append(query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type))
