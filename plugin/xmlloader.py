@@ -40,17 +40,38 @@ class XmlLoader:
   # gtk id
   notify_id = 0
   
+  result = None
+  
+  callback = None
+  
   def __init__(self):
     pass
+  
+  def set_callback(self, callback):
+    self.callback = callback
+  
+  def fresh(self):
+    return self.update_id == None
+  
+  def done(self):
+    if self.catalogue_check:
+      return False
+    
+    if self.catalogue_loader:
+      return False
+    
+    return True
   
   # do update each 10 min only
   def ready_to_update(self):
     try:
       (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(self.file_local)
-      return mtime + 10 * 60 * 60 < time.time()
+      return mtime + 10 * 60 < time.time()
     except OSError:
       return True
 
+  def error(self, result):
+    self.result = result
   
   def update(self):    
     self.clean_keywords()
@@ -71,6 +92,8 @@ class XmlLoader:
   	  self.catalogue_download()
     elif self.has_loaded is False:
       self.catalogue_load()
+    else:
+      self.error('update')
 
   def catalogue_download(self):
     self.updating = True
@@ -84,18 +107,22 @@ class XmlLoader:
     self.catalogue_loader = rb.ChunkLoader()
     self.catalogue_loader.get_url_chunks(self.file_url, 4 * 1024, True, self.catalogue_download_chunk_cb, out)
 
+  def catalogue_download_chunk_close(self, out):
+    out.close()
+
+    shutil.move(self.file_local_temp, self.file_local)
+    self.updating = False
+    self.catalogue_loader = None
+    self.catalogue_load()
+
   def catalogue_download_chunk_cb (self, result, total, out):
     if not result:
-      out.close()
-
-      shutil.move(self.file_local_temp, self.file_local)
-      self.updating = False
-      self.catalogue_loader = None
-      self.catalogue_load()
+      self.catalogue_download_chunk_close(out)
       
     elif isinstance(result, Exception):
-      print result
-      pass
+      self.catalogue_download_chunk_close(out)
+      
+      self.error(result)
      
     else:
       out.write(result)
@@ -114,14 +141,23 @@ class XmlLoader:
     self.catalogue_loader = rb.ChunkLoader()
     self.catalogue_loader.get_url_chunks(self.file_local, 64 * 1024, True, self.catalogue_load_chunk_cb, parser)
 
+  def catalogue_load_chunk_close(self, parser):
+    parser.close()
+    
+    self.updating = False
+    self.catalogue_loader = None
+    
+    self.remove_old();
+
   def catalogue_load_chunk_cb(self, result, total, parser):
-    if not result or isinstance (result, Exception):
-      parser.close ()
+    if not result:
+      self.catalogue_load_chunk_close(parser)
+            
+    elif isinstance(result, Exception):
+      self.catalogue_load_chunk_close(parser)
+
+      self.error(result)
       
-      self.updating = False
-      self.catalogue_loader = None
-      
-      self.remove_old();
     else:
       parser.feed(result)
       
@@ -137,10 +173,16 @@ class XmlLoader:
   def change_idle_cb(self):
     self.notify_status_changed()
     self.notify_id = 0
+    
+    if self.callback:
+      self.callback()
+      
     return False
   
+  # make all entrys old
   def clean_keywords(self):
     pass
 
+  # remove all entrys marked old
   def remove_old(self):
     pass

@@ -6,6 +6,7 @@ import gtk
 from xmlgenresloader import XmlGenresLoader
 from xmlstationsloader import XmlStationsLoader
 from genreview import GenreView
+from loadmanager import LoadManager
 
 class ShoutcastSource(rb.StreamingSource):
 
@@ -22,8 +23,7 @@ class ShoutcastSource(rb.StreamingSource):
   cache_dir = None
   plugin = None
 
-  genresloader = None
-  stationsloader = None
+  loadmanager = LoadManager()
   
   activated = False
   
@@ -70,8 +70,7 @@ class ShoutcastSource(rb.StreamingSource):
 
       self.add(self.vbox_main)
 
-      self.genresloader = XmlGenresLoader(self.db, self.cache_dir, self.entry_type)
-      self.genresloader.update()
+      self.loadmanager.load(XmlGenresLoader(self.db, self.cache_dir, self.entry_type))
       
       self.shell.get_player().connect('playing-source-changed', self.playing_source_changed)
 
@@ -103,8 +102,7 @@ class ShoutcastSource(rb.StreamingSource):
       self.db.do_full_query_parsed(self.stations_query_model, stations_query)
       self.stations_list.set_model(self.stations_query_model)
 
-      self.stationsloader = XmlStationsLoader(self.db, self.cache_dir, self.entry_type, genre)
-      self.stationsloader.update()
+      self.loadmanager.load(XmlStationsLoader(self.db, self.cache_dir, self.entry_type, genre))
 
   def genres_property_selected(self, view, name):
     ens = self.genres_list.get_selection()
