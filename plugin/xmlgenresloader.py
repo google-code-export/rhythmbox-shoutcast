@@ -59,7 +59,7 @@ class XmlGenresLoader(XmlLoader):
         
     genre = self.db.entry_get(entry, rhythmdb.PROP_GENRE)
     
-    print "Remove old genres" + genre
+    print "Remove old genre's: " + genre
 
     query = self.db.query_new()
     self.db.query_append(query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type))
