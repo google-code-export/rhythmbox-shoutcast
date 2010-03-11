@@ -17,6 +17,11 @@ class ShoutcastSource(rb.StreamingSource):
       'plugin',
       'plugin',
       gobject.PARAM_WRITABLE | gobject.PARAM_CONSTRUCT_ONLY),
+    'cache-dir': (gobject.TYPE_STRING,
+      'cache directory',
+      'plugin cache directory',
+      '',
+      gobject.PARAM_WRITABLE | gobject.PARAM_CONSTRUCT_ONLY),
   }
   
   db = None
@@ -31,12 +36,12 @@ class ShoutcastSource(rb.StreamingSource):
   
   def __init__ (self):
     rb.Source.__init__(self, name=_("Shoutcast"))
-    
-    self.cache_dir = os.path.join(rb.user_cache_dir(), 'shoutcast')
 
   def do_set_property(self, property, value):
     if property.name == 'plugin':
       self.plugin = value
+    elif property.name == 'cache-dir':
+      self.cache_dir = value
     else:
       raise AttributeError, 'unknown property %s' % property.name
 

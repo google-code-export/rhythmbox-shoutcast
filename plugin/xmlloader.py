@@ -131,7 +131,12 @@ class XmlLoader:
         
       elif isinstance(result, Exception):
         self.catalogue_download_chunk_close(out)
-        os.remove(self.file_local)
+        
+        try:
+          os.remove(self.file_local)
+        except:
+          pass
+
         self.error(result)
        
       else:
