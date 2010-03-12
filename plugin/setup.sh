@@ -55,8 +55,12 @@ case "$1" in
 	cleanc)
 		cleanc
 		;;
+	debug)
+		install
+		rhythmbox -D shoutcast
+		;;
 	help)
-		echo $"Usage: $0 {clean|cleandb|cleanc|install}"
+		echo $"Usage: $0 {clean|cleandb|cleanc|install|debug}"
 		;;
 	install)
 		install
