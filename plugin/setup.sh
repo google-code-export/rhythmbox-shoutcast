@@ -1,4 +1,4 @@
-#!/bin/bash
+		#!/bin/bash
 # rhythmbox-shoutcast plugin for rhythmbox application.
 # Copyright (C) 2009  Alexey Kuznetsov <ak@axet.ru>
 #
@@ -15,14 +15,60 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# gedit plugin directory
-DEST=~/.gnome2/rhythmbox/plugins/shoutcast/
+install() {
+	# gedit plugin directory
+	DEST=~/.gnome2/rhythmbox/plugins/shoutcast/
 
-# remove currect version of plugin
-rm -rf ${DEST}
+	# remove currect version of plugin
+	rm -rf ${DEST}
 
-# create it
-mkdir -p ${DEST}
+	# create it
+	mkdir -p ${DEST}
 
-# install currect verion of plugin
-cp -rv *.{glade,png,py,rb-plugin} ${DEST}
+	# install currect verion of plugin
+	cp -rv *.{glade,png,py,rb-plugin} ${DEST}
+}
+
+# clean shoutcast cache
+cleanc() {
+	rm -v ~/.cache/rhythmbox/shoutcast/*
+}
+
+# clean rhythmbox database (rhythmdb)
+cleandb() {
+	rm -v ~/.local/share/rhythmbox/rhythmdb.xml 
+}
+
+# clean all rhythmdb settings
+clean() {
+	cleanc
+	cleandb
+}
+
+case "$1" in
+	clean)
+		rh_status_q && exit 0
+		start
+		;;
+	cleandb)
+		if ! rh_status_q; then
+			rm -f $lockfile
+			exit 0
+		fi
+		stop
+		;;
+	cleanc)
+		restart
+		;;
+	help)
+		echo $"Usage: $0 {clean|cleandb|cleanc|install}"
+		;;
+	install)
+		install
+		;;
+	*)
+		install
+		;;
+esac
+
+exit 0
