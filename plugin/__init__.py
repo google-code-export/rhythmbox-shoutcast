@@ -20,6 +20,8 @@ class Shoutcast(rb.Plugin):
   cache_dir = None
 	
   versioncheck = None
+  
+  source = None
 
   def __init__(self):
     rb.Plugin.__init__(self)

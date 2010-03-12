@@ -39,7 +39,7 @@ class VersionCheck:
     self.home_url = config.get('RB Plugin', 'Website', None)
 
   def check(self):
-    if DISABLE:
+    if self.DISABLE:
       return
     
     if not self.ready_to_update():
