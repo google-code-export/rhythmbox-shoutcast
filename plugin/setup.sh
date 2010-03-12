@@ -47,18 +47,13 @@ clean() {
 
 case "$1" in
 	clean)
-		rh_status_q && exit 0
-		start
+		clean
 		;;
 	cleandb)
-		if ! rh_status_q; then
-			rm -f $lockfile
-			exit 0
-		fi
-		stop
+		cleandb
 		;;
 	cleanc)
-		restart
+		cleanc
 		;;
 	help)
 		echo $"Usage: $0 {clean|cleandb|cleanc|install}"
