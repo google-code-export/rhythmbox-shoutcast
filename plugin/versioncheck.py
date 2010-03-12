@@ -9,6 +9,10 @@ class VersionCheck:
   
   file_url = 'http://wiki.rhythmbox-shoutcast.googlecode.com/hg/LastVersion.wiki'
   home_url = ''
+  
+  # if you feels paranoid you can diable version check for this plugin.
+  # simple change DISABLE = True
+  DISABLE = False
 
   # local file name
   file_local = None
@@ -35,6 +39,9 @@ class VersionCheck:
     self.home_url = config.get('RB Plugin', 'Website', None)
 
   def check(self):
+    if DISABLE:
+      return
+    
     if not self.ready_to_update():
       return
     
