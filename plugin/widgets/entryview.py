@@ -45,7 +45,7 @@ class EntryView(rb.EntryView):
 
     cell.set_property('pixbuf', pixbuf)
 
-  def star_click(self, cell, model, iter):
+  def star_click(self, cell, model, path, iter):
     entry = iter_to_entry(self.db, model, iter)
     
     star = self.db.entry_keyword_has(entry, 'star')
@@ -53,3 +53,7 @@ class EntryView(rb.EntryView):
       self.db.entry_keyword_remove(entry, 'star')
     else:
       self.db.entry_keyword_add(entry, 'star')
+
+    self.db.commit()
+    
+    model.row_changed(path, iter)

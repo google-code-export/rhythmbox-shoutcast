@@ -4,7 +4,7 @@ class CellPixbufButton(gtk.GenericCellRenderer):
 
   __gsignals__ = {
                   'toggled': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
-                             (gtk.TreeModel, gtk.TreeIter)),
+                             (gtk.TreeModel, str, gtk.TreeIter)),
   }
 
   __gproperties__ = {
@@ -52,19 +52,16 @@ class CellPixbufButton(gtk.GenericCellRenderer):
       0, 0);
 
   def on_start_editing(self, event, widget, path, background_area, cell_area, flags):
-    print "adf2"
+    model = widget.get_model()
+    iter = model.get_iter(path)
     
-    pass
+    self.emit('toggled', model, iter)
 
   def on_activate(self, event, widget, path, background_area, cell_area, flags):
     model = widget.get_model()
     iter = model.get_iter(path)
     
-    (mouse_x, mouse_y) = widget.get_pointer()
-    (mouse_x, mouse_y) = widget.convert_widget_to_bin_window_coords (mouse_x, mouse_y)
-
-    if mouse_x - cell_area.x >= 0 and mouse_x - cell_area.x <= cell_area.width:
-      self.emit('toggled', model, iter)
+    self.emit('toggled', model, path, iter)
 
     return True
 
