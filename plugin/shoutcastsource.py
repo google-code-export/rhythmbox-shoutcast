@@ -50,38 +50,52 @@ class ShoutcastSource(rb.StreamingSource):
       self.shell = self.get_property('shell')
       self.db = self.shell.props.db
       self.entry_type = self.get_property('entry-type')
-
       self.gconf = gconf.client_get_default()
-      
-      self.vbox_main = gtk.VPaned()
-      self.genres_list = widgets.GenresView(self.db, rhythmdb.PROP_GENRE, _("Genres"))
-      self.genres_list.connect('property-selected', self.genres_property_selected)
-      self.genres_list.connect('property-selection-reset', self.genres_property_selection_reset)      
-      self.stations_list = widgets.EntryView(self.db, self.shell.get_player(), self.plugin)
-      vbox_1 = gtk.VBox()
-      vbox_1.pack_start(self.genres_list)
-      self.vbox_main.add1(vbox_1)
-      self.vbox_main.add2(self.stations_list)
-      self.vbox_main.show_all()
-      self.add(self.vbox_main)
-      
-      manager = self.shell.get_player().get_property('ui-manager')
-      action = gtk.ToggleAction('ShoutcastStaredStations', _('Show/Hide'),
-          _("Show/Hide stared stations in the list"),
-          'gtk-yes')
-      action.connect('activate', self.showhide_stations)
-      self.action_group = gtk.ActionGroup('ShoutcastPluginActions')
-      self.action_group.add_action(action)
-      manager.insert_action_group(self.action_group, 0)
-      self.ui_id = manager.add_ui_from_string(menu_ui)
-      manager.ensure_update()
+
+      self.create_window()
+      self.create_toolbar()
 
       self.load_config()
 
       self.filter_genres_default_query()
-            
+
       self.sync_control_state()
-      
+
+  def create_window(self):
+    self.vbox_main = gtk.VPaned()
+    self.genres_list = widgets.GenresView(self.db, rhythmdb.PROP_GENRE, _("Genres"))
+    self.genres_list.connect('property-selected', self.genres_property_selected)
+    self.genres_list.connect('property-selection-reset', self.genres_property_selection_reset)      
+    self.stations_list = widgets.EntryView(self.db, self.shell.get_player(), self.plugin)
+    vbox_1 = gtk.VBox()
+    vbox_1.pack_start(self.genres_list)
+    self.vbox_main.add1(vbox_1)
+    self.vbox_main.add2(self.stations_list)
+    self.vbox_main.show_all()
+    self.add(self.vbox_main)    
+
+  def create_toolbar(self):
+    icon_file_name = self.plugin.find_file("widgets/filter.png")
+    iconsource = gtk.IconSource()
+    iconsource.set_filename(icon_file_name)
+    iconset = gtk.IconSet()
+    iconset.add_source(iconsource)
+    
+    iconfactory = gtk.IconFactory()
+    iconfactory.add("filter-icon", iconset)
+    iconfactory.add_default()
+
+    manager = self.shell.get_player().get_property('ui-manager')
+    action = gtk.ToggleAction('ShoutcastStaredStations', _('Show/Hide'),
+        _("Show/Hide stared stations in the list"),
+        'filter-icon')
+    action.connect('activate', self.showhide_stations)
+    self.action_group = gtk.ActionGroup('ShoutcastPluginActions')
+    self.action_group.add_action(action)
+    manager.insert_action_group(self.action_group, 0)
+    self.ui_id = manager.add_ui_from_string(menu_ui)
+    manager.ensure_update()
+
   def load_config(self):
     self.filter = bool(self.gconf.get_int('/apps/rhythmbox/plugins/shoutcast/filter'))
     self.vbox_main.set_position(self.gconf.get_int('/apps/rhythmbox/plugins/shoutcast/genres_height'))
@@ -94,8 +108,9 @@ class ShoutcastSource(rb.StreamingSource):
     return self.stations_list
 
   def showhide_stations(self, control):
-    self.filter = ~self.filter
-
+    action = self.action_group.get_action('ShoutcastStaredStations')
+    self.filter = action.get_active()
+    
     self.filter_genres_default_query()
     if self.genre:
       self.filter_by_genre()
