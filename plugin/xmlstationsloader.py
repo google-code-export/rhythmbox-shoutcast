@@ -56,7 +56,7 @@ class XmlStationsLoader(XmlLoader):
   def remove_keywords_db(self, model, path, iter):
     entry = iter_to_entry(self.db, model, iter)
 
-    entry_to_string(entry)
+    entry_to_string(self.db, entry)
 
     self.db.entry_delete(entry)
     
