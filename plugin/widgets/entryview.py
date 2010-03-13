@@ -1,5 +1,5 @@
 import rb
-import gtk
+import gtk, gconf, gnome
 
 from db import *
 from cellpixbufbutton import *
@@ -57,3 +57,6 @@ class EntryView(rb.EntryView):
     self.db.commit()
     
     model.row_changed(path, iter)
+
+  def save_config(self):
+    pass
