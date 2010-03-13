@@ -3,21 +3,20 @@ import xml.sax, xml.sax.handler
 import shutil
 import os, os.path
 
-from xmlloader import XmlLoader
-from xmlgenreshandler import XmlGenresHandler
+from xmlloader import *
+from xmlgenreshandler import *
 from db import *
 from debug import *
 
 class XmlGenresLoader(XmlLoader):
 
   def __init__(self, db, cache_dir, entry_type):
+    XmlLoader.__init__(self, os.path.join(cache_dir, 'genres.xml'),
+                       'http://yp.shoutcast.com/sbin/newxml.phtml')
+
     self.db = db
     self.entry_type = entry_type
     
-    self.file_dir = cache_dir
-    self.file_local = os.path.join(cache_dir, 'genres.xml')
-    self.file_local_temp = self.file_local + '.tmp'
-    self.file_url = 'http://yp.shoutcast.com/sbin/newxml.phtml'
     self.xml_handler = XmlGenresHandler(self.db, self.entry_type)
 
   def clean_keywords(self):

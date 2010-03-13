@@ -26,17 +26,17 @@ install() {
 	mkdir -p ${DEST}
 
 	# install currect verion of plugin
-	cp -rv *.{glade,png,py,rb-plugin} ${DEST}
+	cp -rv plugin/* ${DEST}
 }
 
 # clean shoutcast cache
 cleanc() {
-	rm -v ~/.cache/rhythmbox/shoutcast/*
+	rm -vf ~/.cache/rhythmbox/shoutcast/*
 }
 
 # clean rhythmbox database (rhythmdb)
 cleandb() {
-	rm -v ~/.local/share/rhythmbox/rhythmdb.xml 
+	rm -vf ~/.local/share/rhythmbox/rhythmdb.xml 
 }
 
 # clean all rhythmdb settings

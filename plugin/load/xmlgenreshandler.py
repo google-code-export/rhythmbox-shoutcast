@@ -1,5 +1,8 @@
 import rhythmdb
+
 import xml.sax, xml.sax.handler
+
+import debug
 
 class XmlGenresHandler(xml.sax.handler.ContentHandler):
   
@@ -20,12 +23,8 @@ class XmlGenresHandler(xml.sax.handler.ContentHandler):
       
       entry = self.db.entry_lookup_by_location(track_url)
       if entry == None:
-      	entry = self.db.entry_new(self.entry_type, track_url)
-
-        if not entry:
-          raise Exception('Unable to add entry to database')
-        
-        print "New genre: " + genre
+      	entry = self.db.entry_new(self.entry_type, track_url)        
+        debug.log("New genre: " + genre)
 
       self.db.set(entry, rhythmdb.PROP_GENRE, genre)
       self.db.entry_keyword_remove(entry, 'old')

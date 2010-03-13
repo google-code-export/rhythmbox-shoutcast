@@ -2,6 +2,8 @@
 syntax: regexp
 \.so$
 syntax: regexp
+\.pyc$
+syntax: regexp
 \.o$
 syntax: regexp
 ^totem-py-parser/totem-pl-parser\.c$

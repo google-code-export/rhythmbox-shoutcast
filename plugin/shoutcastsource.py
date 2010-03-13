@@ -3,12 +3,26 @@ import gobject
 import os
 import gtk
 
-from xmlgenresloader import XmlGenresLoader
-from xmlstationsloader import XmlStationsLoader
-from genreview import GenreView
-from loadmanager import LoadManager
+import load
+import widgets.genreview
+import widgets.entryview
+import debug
 
-from debug import *
+menu_ui = """
+<ui>
+  <popup name="JamendoSourceViewPopup">
+    <menuitem name="AddToQueueLibraryPopup" action="AddToQueue"/>
+    <menuitem name="JamendoDownloadAlbum" action="JamendoDownloadAlbum"/>
+    <menuitem name="JamendoDonateArtist" action="JamendoDonateArtist"/>
+    <separator/>
+    <menuitem name="BrowseGenreLibraryPopup" action="BrowserSrcChooseGenre"/>
+    <menuitem name="BrowseArtistLibraryPopup" action="BrowserSrcChooseArtist"/>
+    <menuitem name="BrowseAlbumLibraryPopup" action="BrowserSrcChooseAlbum"/>
+    <separator/>
+    <menuitem name="PropertiesLibraryPopup" action="MusicProperties"/>
+  </popup>
+</ui>
+"""
 
 class ShoutcastSource(rb.StreamingSource):
 
@@ -29,8 +43,8 @@ class ShoutcastSource(rb.StreamingSource):
   entry_type = None
   cache_dir = None
   plugin = None
-
-  loadmanager = LoadManager()
+    
+  loadmanager = load.LoadManager()
   
   activated = False
   
@@ -48,43 +62,39 @@ class ShoutcastSource(rb.StreamingSource):
   def create(self):
       self.shell = self.get_property('shell')
       self.db = self.shell.props.db
-
       self.entry_type = self.get_property('entry-type')
 
       self.vbox_main = gtk.VPaned()
-            
-      self.genres_list = rb.PropertyView(self.db, rhythmdb.PROP_GENRE, _("Genres"))
+      self.genres_list = widgets.GenresView(self.db, rhythmdb.PROP_GENRE, _("Genres"))
       self.genres_list.connect('property-selected', self.genres_property_selected)
-      self.genres_list.connect('property-selection-reset', self.genres_property_selection_reset)
-      self.genres_list.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-      self.genres_list.set_shadow_type(gtk.SHADOW_IN)
-      
-      self.filter_genres_default_query()
-      
-      self.stations_list = rb.EntryView(self.db, self.shell.get_player(), None, False, False)
-      self.stations_list.append_column(rb.ENTRY_VIEW_COL_TITLE, True)
-      self.stations_list.set_columns_clickable(False)
-      self.stations_list.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-      self.stations_list.set_shadow_type(gtk.SHADOW_IN)
-
+      self.genres_list.connect('property-selection-reset', self.genres_property_selection_reset)      
+      self.stations_list = widgets.EntryView(self.db, self.shell.get_player(), self.plugin)
       vbox_1 = gtk.VBox()
       vbox_1.pack_start(self.genres_list)
-
       self.vbox_main.add1(vbox_1)
       self.vbox_main.add2(self.stations_list)
-
       self.vbox_main.show_all()
-
       self.add(self.vbox_main)
-
-      self.loadmanager.load(XmlGenresLoader(self.db, self.cache_dir, self.entry_type))
       
-      self.shell.get_player().connect('playing-source-changed', self.playing_source_changed)
+      manager = self.shell.get_player().get_property('ui-manager')
+      action = gtk.Action('ShoutcastStaredStations', _('ShoutcastStaredStations'),
+          _("ShoutcastStaredStations"),
+          'gtk-save')
+      action.connect('activate', self.showhide)
+      self.action_group = gtk.ActionGroup('ShoutcastPluginActions')
+      self.action_group.add_action(action)
+      manager.insert_action_group(self.action_group, 0)
+      self.ui_id = manager.add_ui_from_string(menu_ui)
+      manager.ensure_update()
+
+      self.filter_genres_default_query()
+
+      self.loadmanager.load(load.XmlGenresLoader(self.db, self.cache_dir, self.entry_type))
 
   def do_impl_get_entry_view(self):
     return self.stations_list
 
-  def playing_source_changed(self, s1, s2):
+  def showhide(self):
     pass
 
   def filter_genres_default_query(self):
@@ -109,7 +119,7 @@ class ShoutcastSource(rb.StreamingSource):
       self.db.do_full_query_parsed(self.stations_query_model, stations_query)
       self.stations_list.set_model(self.stations_query_model)
 
-      self.loadmanager.load(XmlStationsLoader(self.db, self.cache_dir, self.entry_type, genre))
+      self.loadmanager.load(load.XmlStationsLoader(self.db, self.cache_dir, self.entry_type, genre))
 
   def genres_property_selected(self, view, name):
     ens = self.genres_list.get_selection()

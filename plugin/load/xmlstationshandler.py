@@ -1,7 +1,8 @@
 import rhythmdb
-import xml.sax, xml.sax.handler
-import datetime
-import urllib
+
+import xml.sax, xml.sax.handler, datetime, urllib
+
+import debug
 
 '''
 
@@ -43,7 +44,7 @@ class XmlStationsHandler(xml.sax.handler.ContentHandler):
       entry = self.db.entry_lookup_by_location (track_url)
       if entry == None:
       	entry = self.db.entry_new(self.entry_type, track_url)
-        print "New station: " + title
+        debug.log("New station: " + title)
 
       self.db.set(entry, rhythmdb.PROP_TITLE, title)
       self.db.set(entry, rhythmdb.PROP_GENRE, genre)
