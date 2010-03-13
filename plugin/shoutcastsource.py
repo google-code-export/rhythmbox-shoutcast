@@ -47,19 +47,19 @@ class ShoutcastSource(rb.StreamingSource):
       raise AttributeError, 'unknown property %s' % property.name
 
   def create(self):
-      self.shell = self.get_property('shell')
-      self.db = self.shell.props.db
-      self.entry_type = self.get_property('entry-type')
-      self.gconf = gconf.client_get_default()
+    self.shell = self.get_property('shell')
+    self.db = self.shell.props.db
+    self.entry_type = self.get_property('entry-type')
+    self.gconf = gconf.client_get_default()
 
-      self.create_window()
-      self.create_toolbar()
+    self.create_window()
+    self.create_toolbar()
 
-      self.load_config()
+    self.load_config()
 
-      self.filter_genres_default_query()
+    self.load_positions()
 
-      self.sync_control_state()
+    self.sync_control_state()
 
   def create_window(self):
     self.vbox_main = gtk.VPaned()
@@ -72,7 +72,8 @@ class ShoutcastSource(rb.StreamingSource):
     self.vbox_main.add1(vbox_1)
     self.vbox_main.add2(self.stations_list)
     self.vbox_main.show_all()
-    self.add(self.vbox_main)    
+    
+    self.add(self.vbox_main)
 
   def create_toolbar(self):
     icon_file_name = self.plugin.find_file("widgets/filter.png")
@@ -86,8 +87,8 @@ class ShoutcastSource(rb.StreamingSource):
     iconfactory.add_default()
 
     manager = self.shell.get_player().get_property('ui-manager')
-    action = gtk.ToggleAction('ShoutcastStaredStations', _('Show/Hide'),
-        _("Show/Hide stared stations in the list"),
+    action = gtk.ToggleAction('ShoutcastStaredStations', _('Favorites'),
+        _("Filter lists by favorite stations only"),
         'filter-icon')
     action.connect('activate', self.showhide_stations)
     self.action_group = gtk.ActionGroup('ShoutcastPluginActions')
@@ -100,9 +101,6 @@ class ShoutcastSource(rb.StreamingSource):
     self.filter = bool(self.gconf.get_int('/apps/rhythmbox/plugins/shoutcast/filter'))
     self.vbox_main.set_position(self.gconf.get_int('/apps/rhythmbox/plugins/shoutcast/genres_height'))
 
-    self.genres_list.load_config()
-    self.stations_list.load_config()
-
   def save_config(self):
     self.gconf.set_int('/apps/rhythmbox/plugins/shoutcast/filter', self.filter)
     self.gconf.set_int('/apps/rhythmbox/plugins/shoutcast/genres_height', self.vbox_main.get_position())
@@ -114,21 +112,29 @@ class ShoutcastSource(rb.StreamingSource):
     return self.stations_list
 
   def showhide_stations(self, control):
+    filter = self.filter
+    
     action = self.action_group.get_action('ShoutcastStaredStations')
     self.filter = action.get_active()
-    
-    self.genres_list.save_config()    
+
+    if filter != self.filter:
+      self.genres_list.save_config()
+      self.stations_list.save_config()
+          
+    self.load_positions()
+
+  def load_positions(self):
     self.filter_genres_default_query()
     self.genres_list.load_config()
-    
+
     if self.genre:
-      self.stations_list.save_config()
       self.filter_by_genre()
       self.stations_list.load_config()
 
   def sync_control_state(self):
     action = self.action_group.get_action('ShoutcastStaredStations')
     action.set_active(self.filter)
+    self.showhide_stations(action)
 
   def filter_genres_default_query(self):
     genres_query = self.db.query_new()

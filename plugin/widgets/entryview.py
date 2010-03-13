@@ -3,6 +3,7 @@ import gtk, gconf, gnome
 
 from db import *
 from cellpixbufbutton import *
+import debug
 
 class EntryView(rb.EntryView):
 
@@ -14,6 +15,7 @@ class EntryView(rb.EntryView):
     
     self.db = db
     self.plugin = plugin
+    self.gconf = gconf.client_get_default()
     
     self.pixs = [gtk.gdk.pixbuf_new_from_file(self.plugin.find_file('widgets/star-off.png')),
                  gtk.gdk.pixbuf_new_from_file(self.plugin.find_file('widgets/star-on.png'))]
@@ -59,8 +61,16 @@ class EntryView(rb.EntryView):
     model.row_changed(path, iter)
 
   def save_config(self):
-    pass
-  
+    url = ''
+    entrys = self.get_selected_entries()
+    if len(entrys) > 0:
+      entry = entrys[0]
+      url = self.db.entry_get(entry, rhythmdb.PROP_LOCATION)
+    self.gconf.set_string('/apps/rhythmbox/plugins/shoutcast/stations_entry', url)
+
   def load_config(self):
-    pass
-  
+    url = self.gconf.get_string('/apps/rhythmbox/plugins/shoutcast/stations_entry')
+    if url:
+      entry = self.db.entry_lookup_by_location(url)
+      self.select_entry(entry)
+      self.scroll_to_entry(entry)

@@ -13,12 +13,13 @@ class GenresView(rb.PropertyView):
     self.db = db
     self.prop = prop
     self.name = name
+    self.gconf = gconf.client_get_default()
 
     self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
     self.set_shadow_type(gtk.SHADOW_IN)
 
   def save_config(self):
-    pass
+    self.gconf.set_list('/apps/rhythmbox/plugins/shoutcast/genres_selection', 'string', self.get_selection())
 
   def load_config(self):
-    pass
+    self.set_selection(self.gconf.get_list('/apps/rhythmbox/plugins/shoutcast/genres_selection', 'string'))
