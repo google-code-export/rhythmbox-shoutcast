@@ -1,12 +1,6 @@
 import rb, rhythmdb
-import gobject
-import os
-import gtk
-
-import load
-import widgets.genreview
-import widgets.entryview
-import debug
+import gobject, os, gtk, gconf, gnome
+import load, widgets, debug
 
 menu_ui = """
 <ui>
@@ -36,12 +30,10 @@ class ShoutcastSource(rb.StreamingSource):
   entry_type = None
   cache_dir = None
   plugin = None
-    
   loadmanager = load.LoadManager()
-  
   activated = False
-  
   filter = False
+  genre = None
   
   def __init__ (self):
     rb.Source.__init__(self, name=_("Shoutcast"))
@@ -59,6 +51,8 @@ class ShoutcastSource(rb.StreamingSource):
       self.db = self.shell.props.db
       self.entry_type = self.get_property('entry-type')
 
+      self.gconf = gconf.client_get_default()
+      
       self.vbox_main = gtk.VPaned()
       self.genres_list = widgets.GenresView(self.db, rhythmdb.PROP_GENRE, _("Genres"))
       self.genres_list.connect('property-selected', self.genres_property_selected)
@@ -82,11 +76,19 @@ class ShoutcastSource(rb.StreamingSource):
       self.ui_id = manager.add_ui_from_string(menu_ui)
       manager.ensure_update()
 
-      self.filter_genres_default_query()
+      self.load_config()
 
-      self.loadmanager.load(load.XmlGenresLoader(self.db, self.cache_dir, self.entry_type))
-      
+      self.filter_genres_default_query()
+            
       self.sync_control_state()
+      
+  def load_config(self):
+    self.filter = bool(self.gconf.get_int('/apps/rhythmbox/plugins/shoutcast/filter'))
+    self.vbox_main.set_position(self.gconf.get_int('/apps/rhythmbox/plugins/shoutcast/genres_height'))
+
+  def save_config(self):
+    self.gconf.set_int('/apps/rhythmbox/plugins/shoutcast/filter', self.filter)
+    self.gconf.set_int('/apps/rhythmbox/plugins/shoutcast/genres_height', self.vbox_main.get_position())
 
   def do_impl_get_entry_view(self):
     return self.stations_list
@@ -112,6 +114,10 @@ class ShoutcastSource(rb.StreamingSource):
     genres_props_model = self.genres_list.get_model()
     genres_props_model.set_property('query-model', genres_query_model)
 
+    # do not update genres when filter active (no need, favorite mode mean local stations)
+    if not self.filter:
+      self.loadmanager.load(load.XmlGenresLoader(self.db, self.cache_dir, self.entry_type))
+
   def filter_by_genre_clear(self):
     self.stations_query = self.db.query_new()
     self.stations_query_model = self.db.query_model_new_empty ()
@@ -128,7 +134,7 @@ class ShoutcastSource(rb.StreamingSource):
     self.db.do_full_query_parsed(self.stations_query_model, stations_query)
     self.stations_list.set_model(self.stations_query_model)
 
-    # do not update station when filter active
+    # do not update station when filter active (no need, favorite mode mean local stations)
     if not self.filter:
       self.loadmanager.load(load.XmlStationsLoader(self.db, self.cache_dir, self.entry_type, self.genre))
 
@@ -149,5 +155,8 @@ class ShoutcastSource(rb.StreamingSource):
       self.create()
 
     rb.Source.do_impl_activate(self)
+
+  def do_impl_deactivate(self):
+    self.save_config()
 
 gobject.type_register(ShoutcastSource)
