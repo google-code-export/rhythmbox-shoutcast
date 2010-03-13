@@ -10,17 +10,10 @@ import debug
 
 menu_ui = """
 <ui>
-  <popup name="JamendoSourceViewPopup">
-    <menuitem name="AddToQueueLibraryPopup" action="AddToQueue"/>
-    <menuitem name="JamendoDownloadAlbum" action="JamendoDownloadAlbum"/>
-    <menuitem name="JamendoDonateArtist" action="JamendoDonateArtist"/>
+  <toolbar name="ToolBar">
     <separator/>
-    <menuitem name="BrowseGenreLibraryPopup" action="BrowserSrcChooseGenre"/>
-    <menuitem name="BrowseArtistLibraryPopup" action="BrowserSrcChooseArtist"/>
-    <menuitem name="BrowseAlbumLibraryPopup" action="BrowserSrcChooseAlbum"/>
-    <separator/>
-    <menuitem name="PropertiesLibraryPopup" action="MusicProperties"/>
-  </popup>
+    <toolitem name="ShoutcastStaredStations" action="ShoutcastStaredStations"/>
+  </toolbar>
 </ui>
 """
 
@@ -77,7 +70,7 @@ class ShoutcastSource(rb.StreamingSource):
       self.add(self.vbox_main)
       
       manager = self.shell.get_player().get_property('ui-manager')
-      action = gtk.Action('ShoutcastStaredStations', _('ShoutcastStaredStations'),
+      action = gtk.Action('ShoutcastStaredStations', _('Show/Hide'),
           _("ShoutcastStaredStations"),
           'gtk-save')
       action.connect('activate', self.showhide)
