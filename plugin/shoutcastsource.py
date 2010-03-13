@@ -71,9 +71,9 @@ class ShoutcastSource(rb.StreamingSource):
       
       manager = self.shell.get_player().get_property('ui-manager')
       action = gtk.Action('ShoutcastStaredStations', _('Show/Hide'),
-          _("ShoutcastStaredStations"),
-          'gtk-save')
-      action.connect('activate', self.showhide)
+          _("Show/Hide stared stations in the list"),
+          'gtk-yes')
+      action.connect('activate', self.showhide_stations)
       self.action_group = gtk.ActionGroup('ShoutcastPluginActions')
       self.action_group.add_action(action)
       manager.insert_action_group(self.action_group, 0)
@@ -87,7 +87,7 @@ class ShoutcastSource(rb.StreamingSource):
   def do_impl_get_entry_view(self):
     return self.stations_list
 
-  def showhide(self):
+  def showhide_stations(self, control):
     pass
 
   def filter_genres_default_query(self):
