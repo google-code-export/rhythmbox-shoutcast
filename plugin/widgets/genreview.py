@@ -19,3 +19,6 @@ class GenresView(rb.PropertyView):
 
   def save_config(self):
     pass
+
+  def load_config(self):
+    pass

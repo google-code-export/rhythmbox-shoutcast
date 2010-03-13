@@ -60,3 +60,7 @@ class EntryView(rb.EntryView):
 
   def save_config(self):
     pass
+  
+  def load_config(self):
+    pass
+  
