@@ -6,6 +6,7 @@ import os
 from xmlloader import XmlLoader
 from xmlstationshandler import XmlStationsHandler
 from db import *
+from debug import *
 
 class XmlStationsLoader(XmlLoader):
 
