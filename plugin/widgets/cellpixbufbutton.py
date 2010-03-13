@@ -1,0 +1,71 @@
+import gtk, gobject
+
+class CellPixbufButton(gtk.GenericCellRenderer):
+
+  __gsignals__ = {
+                  'toggled': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
+                             (gtk.TreeModel, gtk.TreeIter)),
+  }
+
+  __gproperties__ = {
+                     'pixbuf': (gtk.gdk.Pixbuf, 'pixbuf', 'pixbuf', gobject.PARAM_WRITABLE),
+  }
+
+  pixbuf = None
+
+  def __init__(self):
+    gtk.GenericCellRenderer.__init__(self)
+    
+    self.set_property('mode', gtk.CELL_RENDERER_MODE_ACTIVATABLE)
+
+  def do_set_property(self, property, value):
+    if property.name == 'pixbuf':
+      self.pixbuf = value
+    else:
+      raise AttributeError, 'unknown property %s' % property.name
+
+  def on_get_size(self, widget, cell_area):
+    xoffset = 0
+    yoffset = 0
+    width = self.pixbuf.get_width()
+    height = self.pixbuf.get_height()
+    return (xoffset, yoffset, width, height)
+
+  def on_render(self, window, widget, background_area, cell_area, expose_area, flags):
+    (xoffset, yoffset, width, height) = self.get_size(widget, cell_area)
+  
+    xoffset += cell_area.x;
+    yoffset += cell_area.y;
+    width -= self.get_property('xpad') * 2;
+    height -= self.get_property('ypad') * 2;
+  
+    draw_rect = cell_area.intersect((xoffset, yoffset, width, height)) 
+    window.draw_pixbuf(None,
+      self.pixbuf,
+      draw_rect.x - xoffset,
+      draw_rect.y - yoffset,
+      draw_rect.x,
+      draw_rect.y,
+      draw_rect.width,
+      draw_rect.height,
+      gtk.gdk.RGB_DITHER_NORMAL,
+      0, 0);
+
+  def on_start_editing(self, event, widget, path, background_area, cell_area, flags):
+    print "adf2"
+    
+    pass
+
+  def on_activate(self, event, widget, path, background_area, cell_area, flags):
+    model = widget.get_model()
+    iter = model.get_iter(path)
+    
+    (mouse_x, mouse_y) = widget.get_pointer()
+    (mouse_x, mouse_y) = widget.convert_widget_to_bin_window_coords (mouse_x, mouse_y)
+
+    if mouse_x - cell_area.x >= 0 and mouse_x - cell_area.x <= cell_area.width:
+      self.emit('toggled', model, iter)
+
+    return True
+
+gobject.type_register(CellPixbufButton)

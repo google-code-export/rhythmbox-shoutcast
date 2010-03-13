@@ -2,6 +2,7 @@ import rb
 import gtk
 
 from db import *
+from cellpixbufbutton import *
 
 class EntryView(rb.EntryView):
 
@@ -19,9 +20,8 @@ class EntryView(rb.EntryView):
 
     self.append_column(rb.ENTRY_VIEW_COL_TITLE, True)
 
-    cell_render = gtk.CellRendererPixbuf()
-    #cell_render.connect('pixbuf-clicked', self.star_click)
-    
+    cell_render = CellPixbufButton()
+    cell_render.connect('toggled', self.star_click)
     column = gtk.TreeViewColumn()
     column.pack_start(cell_render)
     column.set_cell_data_func(cell_render, self.star_func)
@@ -45,5 +45,11 @@ class EntryView(rb.EntryView):
 
     cell.set_property('pixbuf', pixbuf)
 
-  def star_click(self):
-    pass
+  def star_click(self, cell, model, iter):
+    entry = iter_to_entry(self.db, model, iter)
+    
+    star = self.db.entry_keyword_has(entry, 'star')
+    if star:
+      self.db.entry_keyword_remove(entry, 'star')
+    else:
+      self.db.entry_keyword_add(entry, 'star')
