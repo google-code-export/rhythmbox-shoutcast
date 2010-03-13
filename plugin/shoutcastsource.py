@@ -41,6 +41,8 @@ class ShoutcastSource(rb.StreamingSource):
   
   activated = False
   
+  filter = False
+  
   def __init__ (self):
     rb.Source.__init__(self, name=_("Shoutcast"))
 
@@ -70,7 +72,7 @@ class ShoutcastSource(rb.StreamingSource):
       self.add(self.vbox_main)
       
       manager = self.shell.get_player().get_property('ui-manager')
-      action = gtk.Action('ShoutcastStaredStations', _('Show/Hide'),
+      action = gtk.ToggleAction('ShoutcastStaredStations', _('Show/Hide'),
           _("Show/Hide stared stations in the list"),
           'gtk-yes')
       action.connect('activate', self.showhide_stations)
@@ -83,43 +85,60 @@ class ShoutcastSource(rb.StreamingSource):
       self.filter_genres_default_query()
 
       self.loadmanager.load(load.XmlGenresLoader(self.db, self.cache_dir, self.entry_type))
+      
+      self.sync_control_state()
 
   def do_impl_get_entry_view(self):
     return self.stations_list
 
   def showhide_stations(self, control):
-    pass
+    self.filter = ~self.filter
+
+    self.filter_genres_default_query()
+    if self.genre:
+      self.filter_by_genre()
+
+  def sync_control_state(self):
+    action = self.action_group.get_action('ShoutcastStaredStations')
+    action.set_active(self.filter)
 
   def filter_genres_default_query(self):
-      genres_query = self.db.query_new()
-      self.db.query_append(genres_query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type))
-      genres_query_model = self.db.query_model_new_empty ()
-      self.db.do_full_query_parsed(genres_query_model, genres_query)
-      genres_props_model = self.genres_list.get_model()
-      genres_props_model.set_property('query-model', genres_query_model)
+    genres_query = self.db.query_new()
+    self.db.query_append(genres_query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type))
+    if self.filter:
+      self.db.query_append(genres_query, (rhythmdb.QUERY_PROP_LIKE, rhythmdb.PROP_KEYWORD, 'star'))
+    genres_query_model = self.db.query_model_new_empty ()
+    self.db.do_full_query_parsed(genres_query_model, genres_query)
+    genres_props_model = self.genres_list.get_model()
+    genres_props_model.set_property('query-model', genres_query_model)
 
   def filter_by_genre_clear(self):
-      self.stations_query = self.db.query_new()
-      self.stations_query_model = self.db.query_model_new_empty ()
-      self.stations_list.set_model(self.stations_query_model)
+    self.stations_query = self.db.query_new()
+    self.stations_query_model = self.db.query_model_new_empty ()
+    self.stations_list.set_model(self.stations_query_model)
 
-  def filter_by_genre(self, genre):
-      stations_query = self.db.query_new()
-      self.db.query_append(stations_query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type))
-      self.db.query_append(stations_query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_GENRE, genre))
-      self.db.query_append(stations_query, (rhythmdb.QUERY_PROP_LIKE, rhythmdb.PROP_KEYWORD, 'station'))
-      self.stations_query_model = self.db.query_model_new_empty ()
-      self.db.do_full_query_parsed(self.stations_query_model, stations_query)
-      self.stations_list.set_model(self.stations_query_model)
+  def filter_by_genre(self):
+    stations_query = self.db.query_new()
+    self.db.query_append(stations_query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type))
+    self.db.query_append(stations_query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_GENRE, self.genre))
+    self.db.query_append(stations_query, (rhythmdb.QUERY_PROP_LIKE, rhythmdb.PROP_KEYWORD, 'station'))
+    if self.filter:
+      self.db.query_append(stations_query, (rhythmdb.QUERY_PROP_LIKE, rhythmdb.PROP_KEYWORD, 'star'))
+    self.stations_query_model = self.db.query_model_new_empty ()
+    self.db.do_full_query_parsed(self.stations_query_model, stations_query)
+    self.stations_list.set_model(self.stations_query_model)
 
-      self.loadmanager.load(load.XmlStationsLoader(self.db, self.cache_dir, self.entry_type, genre))
+    # do not update station when filter active
+    if not self.filter:
+      self.loadmanager.load(load.XmlStationsLoader(self.db, self.cache_dir, self.entry_type, self.genre))
 
   def genres_property_selected(self, view, name):
     ens = self.genres_list.get_selection()
     if not ens:
       self.filter_by_genre_clear()
     else:
-      self.filter_by_genre(ens[0])
+      self.genre = ens[0]
+      self.filter_by_genre()
 
   def genres_property_selection_reset(self):
     self.filter_by_genre_clear()
