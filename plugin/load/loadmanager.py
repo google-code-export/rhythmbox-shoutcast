@@ -30,6 +30,7 @@ class LoadManager:
 
   def loader_changed(self):
     self.checkstatus()
+    self.__notify_status_changed();
 
   def checkstatus(self):
     if self.xmlloader:
