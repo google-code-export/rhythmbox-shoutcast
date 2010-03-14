@@ -15,8 +15,8 @@ class CheckDownload:
   # where to get this file from the internet
   file_url = None
   
-  # 10 hours interval
-  check_interval = 10 * 60 * 60
+  # 24 hours interval
+  check_interval = 24 * 60 * 60
 
   file_check = None
   # indicate file completely downloaded
