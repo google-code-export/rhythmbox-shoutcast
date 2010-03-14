@@ -105,16 +105,16 @@ class CheckDownload:
   def catalogue_download_chunk_close(self, out):
     self.catalogue_loader = None
     out.close()
-    shutil.move(self.file_local_temp, self.file_local)
-    debug.log(self.file_local)
 
   def catalogue_download_chunk_cb (self, result, total, out):
     try:
       if not result:
         self.catalogue_download_chunk_close(out)
+        shutil.move(self.file_local_temp, self.file_local)
+        debug.log(self.file_local)
       elif isinstance(result, Exception):
         self.catalogue_download_chunk_close(out)
-        os.remove(self.file_local)
+        os.remove(self.file_local_temp)
         self.set_error(result)
       else:
         out.write(result)
