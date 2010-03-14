@@ -118,8 +118,10 @@ class ShoutcastSource(rb.StreamingSource):
     self.gconf.set_int('/apps/rhythmbox/plugins/shoutcast/filter', self.filter)
     self.gconf.set_int('/apps/rhythmbox/plugins/shoutcast/genres_height', self.vbox_main.get_position())
     
-    self.genres_list.save_config()
-    self.stations_list.save_config()
+    if self.genres_list.genre():
+      self.genres_list.save_config()
+    if self.stations_list.get_entry_url():
+      self.stations_list.save_config()
 
   def do_impl_get_entry_view(self):
     return self.stations_list
@@ -132,6 +134,8 @@ class ShoutcastSource(rb.StreamingSource):
 
     if self.genres_list.genre():
       self.genres_list.save_config()
+      
+    if self.stations_list.get_entry_url():
       self.stations_list.save_config()
 
     self.load_positions()

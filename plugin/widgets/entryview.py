@@ -69,10 +69,7 @@ class EntryView(rb.EntryView):
       return None
 
   def save_config(self):
-    url = self.get_entry_url()
-    if not url:
-      url = ''
-    self.gconf.set_string('/apps/rhythmbox/plugins/shoutcast/stations_entry', url)
+    self.gconf.set_string('/apps/rhythmbox/plugins/shoutcast/stations_entry', self.get_entry_url())
 
   def load_config(self):
     url = self.gconf.get_string('/apps/rhythmbox/plugins/shoutcast/stations_entry')
