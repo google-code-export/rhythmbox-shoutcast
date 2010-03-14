@@ -72,6 +72,7 @@ case "$1" in
 		;;
 	uninstall)
 		uninstall
+		;;
 	install)
 		install
 		;;
