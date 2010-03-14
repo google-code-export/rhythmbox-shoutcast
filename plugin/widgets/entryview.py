@@ -73,4 +73,8 @@ class EntryView(rb.EntryView):
     if url:
       entry = self.db.entry_lookup_by_location(url)
       self.select_entry(entry)
-      self.scroll_to_entry(entry)
+      # hack
+      gobject.idle_add(self.hack_scroll_to_entry, entry)
+  
+  def hack_scroll_to_entry(self, entry):
+    self.scroll_to_entry(entry)
