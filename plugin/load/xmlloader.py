@@ -1,9 +1,6 @@
-import rhythmdb
-import xml.sax, xml.sax.handler
-import shutil
-import gobject
-import rb
-import os, time
+import rhythmdb, rb
+import xml.sax, xml.sax.handler, shutil, gobject, os, time
+import debug
 
 from checkdownload import *
 
