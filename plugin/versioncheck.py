@@ -52,9 +52,14 @@ class VersionCheck(load.CheckDownload):
     file = open(self.file_local)
     version = file.readline()
     
-    if self.version != version:
-      self.notify(_("Rhythmbox-Shoutcast plugin"),
-                  _("New version available: ") + version + _("\n\nPlease visit " + self.home_url));
+    vs_site = version.split('.')
+    vs_local = self.version.split('.')
+    
+    for i in range(3):
+      if int(vs_local[i]) < int(vs_site[i]):
+        self.notify(_("Rhythmbox-Shoutcast plugin"),
+                    _("New version available: ") + version + _("\n\nPlease visit " + self.home_url));
+        break
 
   def notify(self, message, version):
     try:
