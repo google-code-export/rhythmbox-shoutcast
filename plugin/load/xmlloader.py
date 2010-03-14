@@ -124,7 +124,7 @@ class XmlLoader(CheckDownload):
 
         self.__load_current_size += len(result)
         self.__load_total_size = total
-    except SAXParseException:
+    except xml.sax.SAXParseException:
       if self.catalogue_loader:
         self.catalogue_loader.cancel()
       self.close_and_remove()
