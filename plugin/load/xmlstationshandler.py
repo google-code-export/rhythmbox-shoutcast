@@ -39,7 +39,7 @@ class XmlStationsHandler(xml.sax.handler.ContentHandler):
       id = int(self.attrs['id'])
       title = self.attrs['name']
       
-      track_url = 'http://yp.shoutcast.com/sbin/tunein-station.pls?id=%d&genre="%s"' % (id, urllib.quote(genre))
+      track_url = 'http://yp.shoutcast.com/sbin/tunein-station.pls?id=%d&genre=%s' % (id, urllib.quote(genre))
       
       entry = self.db.entry_lookup_by_location (track_url)
       if entry == None:

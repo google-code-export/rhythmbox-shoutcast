@@ -17,7 +17,7 @@ class XmlGenresHandler(xml.sax.handler.ContentHandler):
       
       genre = self.attrs['name']
       
-      track_url = 'http://yp.shoutcast.com/sbin/newxml.phtml?genre="%s"' % (urllib.quote(genre))
+      track_url = 'http://yp.shoutcast.com/sbin/newxml.phtml?genre=%s' % (urllib.quote(genre))
 
       entry = self.db.entry_lookup_by_location(track_url)
       if entry == None:
