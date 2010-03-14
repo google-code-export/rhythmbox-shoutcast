@@ -87,6 +87,13 @@ class XmlLoader(CheckDownload):
     self.db.commit()
     
     self.remove_old()
+    
+  def close_and_remove(self):
+    try:
+      debug.log('remove bad xml ' + self.file_local)
+      os.remove(self.file_local)
+    except:
+      pass
 
   def catalogue_load_chunk_cb(self, result, total, parser):
     try:
@@ -101,7 +108,14 @@ class XmlLoader(CheckDownload):
 
         self.load_current_size += len(result)
         self.load_total_size = total
+    except SAXParseException:
+      if self.catalogue_loader:
+        self.catalogue_loader.cancel()
+      self.close_and_remove()
+      self.set_error(debug.fe())
     except:
+      if self.catalogue_loader:
+        self.catalogue_loader.cancel()
       self.set_error(debug.fe())
 
     self.__notify_status_changed()
