@@ -33,7 +33,6 @@ class ShoutcastSource(rb.StreamingSource):
   loadmanager = load.LoadManager()
   activated = False
   filter = False
-  genre = None
   
   def __init__ (self):
     rb.Source.__init__(self, name=_("Shoutcast"))
@@ -57,20 +56,24 @@ class ShoutcastSource(rb.StreamingSource):
 
     self.load_config()
 
-    self.load_positions()
-
     self.sync_control_state()
+    
+    self.connect_all()
 
+  def connect_all(self):
+    self.genres_list.connect('property-selected', self.genres_property_selected)
+    self.genres_list.connect('property-selection-reset', self.genres_property_selection_reset)      
+    action = self.action_group.get_action('ShoutcastStaredStations')
+    action.connect('activate', self.showhide_stations)
+    
   def create_window(self):
     self.vbox_main = gtk.VPaned()
     self.genres_list = widgets.GenresView(self.db, rhythmdb.PROP_GENRE, _("Genres"))
-    self.genres_list.connect('property-selected', self.genres_property_selected)
-    self.genres_list.connect('property-selection-reset', self.genres_property_selection_reset)      
     self.stations_list = widgets.EntryView(self.db, self.shell.get_player(), self.plugin)
     vbox_1 = gtk.VBox()
     vbox_1.pack_start(self.genres_list)
-    self.vbox_main.add1(vbox_1)
-    self.vbox_main.add2(self.stations_list)
+    self.vbox_main.pack1(vbox_1, True, False)
+    self.vbox_main.pack2(self.stations_list, True, False)
     self.vbox_main.show_all()
     
     self.add(self.vbox_main)
@@ -90,7 +93,6 @@ class ShoutcastSource(rb.StreamingSource):
     action = gtk.ToggleAction('ShoutcastStaredStations', _('Favorites'),
         _("Filter lists by favorite stations only"),
         'filter-icon')
-    action.connect('activate', self.showhide_stations)
     self.action_group = gtk.ActionGroup('ShoutcastPluginActions')
     self.action_group.add_action(action)
     manager.insert_action_group(self.action_group, 0)
@@ -100,6 +102,8 @@ class ShoutcastSource(rb.StreamingSource):
   def load_config(self):
     self.filter = bool(self.gconf.get_int('/apps/rhythmbox/plugins/shoutcast/filter'))
     self.vbox_main.set_position(self.gconf.get_int('/apps/rhythmbox/plugins/shoutcast/genres_height'))
+    
+    self.load_positions()
 
   def save_config(self):
     self.gconf.set_int('/apps/rhythmbox/plugins/shoutcast/filter', self.filter)
@@ -117,24 +121,22 @@ class ShoutcastSource(rb.StreamingSource):
     action = self.action_group.get_action('ShoutcastStaredStations')
     self.filter = action.get_active()
 
-    if filter != self.filter:
-      self.genres_list.save_config()
-      self.stations_list.save_config()
-          
+    self.genres_list.save_config()
+    self.stations_list.save_config()
+
     self.load_positions()
 
   def load_positions(self):
     self.filter_genres_default_query()
     self.genres_list.load_config()
 
-    if self.genre:
-      self.filter_by_genre()
+    if self.genres_list.genre():
+      self.filter_by_genre(self.genres_list.genre())
       self.stations_list.load_config()
 
   def sync_control_state(self):
     action = self.action_group.get_action('ShoutcastStaredStations')
     action.set_active(self.filter)
-    self.showhide_stations(action)
 
   def filter_genres_default_query(self):
     genres_query = self.db.query_new()
@@ -155,10 +157,10 @@ class ShoutcastSource(rb.StreamingSource):
     self.stations_query_model = self.db.query_model_new_empty ()
     self.stations_list.set_model(self.stations_query_model)
 
-  def filter_by_genre(self):
+  def filter_by_genre(self, genre):
     stations_query = self.db.query_new()
     self.db.query_append(stations_query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type))
-    self.db.query_append(stations_query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_GENRE, self.genre))
+    self.db.query_append(stations_query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_GENRE, genre))
     self.db.query_append(stations_query, (rhythmdb.QUERY_PROP_LIKE, rhythmdb.PROP_KEYWORD, 'station'))
     if self.filter:
       self.db.query_append(stations_query, (rhythmdb.QUERY_PROP_LIKE, rhythmdb.PROP_KEYWORD, 'star'))
@@ -168,15 +170,14 @@ class ShoutcastSource(rb.StreamingSource):
 
     # do not update station when filter active (no need, favorite mode mean local stations)
     if not self.filter:
-      self.loadmanager.load(load.XmlStationsLoader(self.db, self.cache_dir, self.entry_type, self.genre))
+      self.loadmanager.load(load.XmlStationsLoader(self.db, self.cache_dir, self.entry_type, genre))
 
   def genres_property_selected(self, view, name):
-    ens = self.genres_list.get_selection()
-    if not ens:
-      self.filter_by_genre_clear()
+    genre = self.genres_list.genre()
+    if genre:
+      self.filter_by_genre(genre)
     else:
-      self.genre = ens[0]
-      self.filter_by_genre()
+      self.filter_by_genre_clear()
 
   def genres_property_selection_reset(self):
     self.filter_by_genre_clear()
