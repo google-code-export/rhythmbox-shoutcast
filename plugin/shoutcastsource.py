@@ -69,6 +69,8 @@ class ShoutcastSource(rb.StreamingSource):
     action = self.action_group.get_action('CopyURL')
     action.connect('activate', self.copy_url)
     
+    self.stations_list.connect('show_popup', self.do_impl_show_popup)
+    
   def create_window(self):
     self.vbox_main = gtk.VPaned()
     self.genres_list = widgets.GenresView(self.db, rhythmdb.PROP_GENRE, _("Genres"))
@@ -100,7 +102,7 @@ class ShoutcastSource(rb.StreamingSource):
     self.action_group.add_action(action)
     action = gtk.Action('CopyURL', _('Copy station URL'),
         _("Copy station URL to clipboard"),
-        '')
+        'gtk-copy')
     self.action_group.add_action(action)
     manager.insert_action_group(self.action_group, 0)
     self.ui_id = manager.add_ui_from_string(menu_ui)
@@ -142,8 +144,9 @@ class ShoutcastSource(rb.StreamingSource):
       self.filter_by_genre(self.genres_list.genre())
       self.stations_list.load_config()
 
-  def copy_url(self):
-    pass
+  def copy_url(self, action):
+    clipboard = gtk.clipboard_get()
+    clipboard.set_text(self.stations_list.get_entry_url())
 
   def sync_control_state(self):
     action = self.action_group.get_action('ShoutcastStaredStations')
@@ -193,8 +196,10 @@ class ShoutcastSource(rb.StreamingSource):
   def genres_property_selection_reset(self):
     self.filter_by_genre_clear()
 
-  def do_impl_show_entry_popup(self):
-    self.show_source_popup ("/ShoutcastSourceViewPopup")
+  def do_impl_show_popup(self, entry, source):
+    self.show_source_popup("/ShoutcastSourceViewPopup")
+    
+    return True
 
   def do_impl_get_status(self):
     if self.loadmanager.load_progress():
