@@ -201,7 +201,7 @@ class ShoutcastSource(rb.StreamingSource):
       return (_("Loading Shoutcast stations"), text, progress)
     else:
       qm = self.genres_list.get_model().get_property("query-model")
-      return (qm.compute_status_normal("%d song", "%d songs"), None, 0.0)
+      return (qm.compute_status_normal("%d song", "%d songs"), None, 1)
 
   def do_impl_activate(self):
     if not self.activated:
