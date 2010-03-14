@@ -60,13 +60,16 @@ class EntryView(rb.EntryView):
     
     model.row_changed(path, iter)
 
-  def save_config(self):
-    url = ''
+  def get_entry_url(self):
     entrys = self.get_selected_entries()
     if len(entrys) > 0:
       entry = entrys[0]
-      url = self.db.entry_get(entry, rhythmdb.PROP_LOCATION)
-    self.gconf.set_string('/apps/rhythmbox/plugins/shoutcast/stations_entry', url)
+      return self.db.entry_get(entry, rhythmdb.PROP_LOCATION)
+    else:
+      return None
+
+  def save_config(self):
+    self.gconf.set_string('/apps/rhythmbox/plugins/shoutcast/stations_entry', self.get_entry_url())
 
   def load_config(self):
     url = self.gconf.get_string('/apps/rhythmbox/plugins/shoutcast/stations_entry')
