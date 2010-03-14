@@ -1,4 +1,4 @@
-		#!/bin/bash
+#!/bin/bash
 # rhythmbox-shoutcast plugin for rhythmbox application.
 # Copyright (C) 2009  Alexey Kuznetsov <ak@axet.ru>
 #
