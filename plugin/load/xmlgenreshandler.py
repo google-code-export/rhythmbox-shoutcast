@@ -1,7 +1,5 @@
 import rhythmdb
-
-import xml.sax, xml.sax.handler
-
+import xml.sax, xml.sax.handler, urllib
 import debug
 
 class XmlGenresHandler(xml.sax.handler.ContentHandler):
@@ -20,7 +18,8 @@ class XmlGenresHandler(xml.sax.handler.ContentHandler):
       genre = self.attrs['name']
       
       track_url = 'http://yp.shoutcast.com/sbin/newxml.phtml?genre=%s' % genre
-      
+      track_url = urllib.quote(track_url)
+
       entry = self.db.entry_lookup_by_location(track_url)
       if entry == None:
       	entry = self.db.entry_new(self.entry_type, track_url)        
