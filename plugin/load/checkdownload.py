@@ -29,8 +29,8 @@ class CheckDownload:
   __notify_id = 0
   
   # parser/downloader status
-  load_current_size = 0
-  load_total_size = 0
+  __load_current_size = 0
+  __load_total_size = 0
 
   def __init__(self, file_local, file_url):
     self.file_dir = os.path.dirname(file_local)
@@ -69,8 +69,8 @@ class CheckDownload:
     self.__callback = callback
     
   def check_get_progress(self):
-    if self.load_total_size != 0:
-      return (self.file_url, self.load_current_size / self.load_total_size)
+    if self.__load_total_size != 0:
+      return (self.file_url, self.__load_current_size / float(self.__load_total_size))
     else:
       return (self.file_url, -1)
 
@@ -122,8 +122,8 @@ class CheckDownload:
         self.set_error(result)
       else:
         out.write(result)
-        self.load_current_size += len(result)
-        self.load_total_size = total
+        self.__load_current_size += len(result)
+        self.__load_total_size = total
     except:
       self.set_error(debug.fe())
 

@@ -20,6 +20,9 @@ class XmlLoader(CheckDownload):
   # exception / error text message
   error = None
   
+  __load_current_size = 0
+  __load_total_size = 0
+
   __callback = None
   __notify_id = 0
   
@@ -60,8 +63,8 @@ class XmlLoader(CheckDownload):
     if self.check_progress():
       return self.check_get_progress()
     else:
-      if self.load_total_size != 0:
-        return (self.url, self.load_current_size / self.load_total_size)
+      if self.__load_total_size != 0:
+        return (self.url, self.__load_current_size / float(self.__load_total_size))
       else:
         return (self.url, -1)
 
@@ -89,7 +92,7 @@ class XmlLoader(CheckDownload):
     parser.setContentHandler(self.xml_handler)
     
     self.catalogue_loader = rb.ChunkLoader()
-    self.catalogue_loader.get_url_chunks(self.file_local, 1 * 1024, True, self.catalogue_load_chunk_cb, parser)
+    self.catalogue_loader.get_url_chunks(self.file_local, 10 * 1024, True, self.catalogue_load_chunk_cb, parser)
 
   def catalogue_load_chunk_close(self, parser):
     parser.close()
@@ -119,8 +122,8 @@ class XmlLoader(CheckDownload):
       else:
         parser.feed(result)
 
-        self.load_current_size += len(result)
-        self.load_total_size = total
+        self.__load_current_size += len(result)
+        self.__load_total_size = total
     except SAXParseException:
       if self.catalogue_loader:
         self.catalogue_loader.cancel()
