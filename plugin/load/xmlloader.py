@@ -14,6 +14,8 @@ class XmlLoader(CheckDownload):
   xml_handler = None
 
   fresh = True
+  
+  catalogue_loader = None
     
   # exception / error text message
   error = None
@@ -24,11 +26,16 @@ class XmlLoader(CheckDownload):
   def __init__(self, file, url):
     CheckDownload.__init__(self, file, url)
     
+    self.url = url
+    
     self.check_callback(self.download_state)
   
   def loader_progress(self):
     if self.error:
       return False
+    
+    if self.check_progress():
+      return True
    
     if self.catalogue_loader:
       return True
@@ -48,6 +55,15 @@ class XmlLoader(CheckDownload):
 
   def loader_result(self):
     return self.error
+
+  def loader_get_progress(self):
+    if self.check_progress():
+      return self.check_get_progress()
+    else:
+      if self.load_total_size != 0:
+        return (self.url, self.load_current_size / self.load_total_size)
+      else:
+        return (self.url, -1)
 
   def set_error(self, e):
     self.error = e

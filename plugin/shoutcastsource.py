@@ -4,10 +4,9 @@ import load, widgets, debug
 
 menu_ui = """
 <ui>
-  <toolbar name="ToolBar">
-    <separator/>
-    <toolitem name="ShoutcastStaredStations" action="ShoutcastStaredStations"/>
-  </toolbar>
+  <popup name="ShoutcastSourceViewPopup">
+    <menuitem name="CopyURL" action="CopyURL"/>
+  </popup>
 </ui>
 """
 
@@ -36,6 +35,8 @@ class ShoutcastSource(rb.StreamingSource):
   
   def __init__ (self):
     rb.Source.__init__(self, name=_("Shoutcast"))
+    
+    self.loadmanager.load_callback(self.load_status_changed)
 
   def do_set_property(self, property, value):
     if property.name == 'plugin':
@@ -65,6 +66,8 @@ class ShoutcastSource(rb.StreamingSource):
     self.genres_list.connect('property-selection-reset', self.genres_property_selection_reset)      
     action = self.action_group.get_action('ShoutcastStaredStations')
     action.connect('activate', self.showhide_stations)
+    action = self.action_group.get_action('CopyURL')
+    action.connect('activate', self.copy_url)
     
   def create_window(self):
     self.vbox_main = gtk.VPaned()
@@ -90,10 +93,14 @@ class ShoutcastSource(rb.StreamingSource):
     iconfactory.add_default()
 
     manager = self.shell.get_player().get_property('ui-manager')
+    self.action_group = gtk.ActionGroup('ShoutcastPluginActions')
     action = gtk.ToggleAction('ShoutcastStaredStations', _('Favorites'),
         _("Filter lists by favorite stations only"),
         'filter-icon')
-    self.action_group = gtk.ActionGroup('ShoutcastPluginActions')
+    self.action_group.add_action(action)
+    action = gtk.Action('CopyURL', _('Copy station URL'),
+        _("Copy station URL to clipboard"),
+        '')
     self.action_group.add_action(action)
     manager.insert_action_group(self.action_group, 0)
     self.ui_id = manager.add_ui_from_string(menu_ui)
@@ -133,6 +140,9 @@ class ShoutcastSource(rb.StreamingSource):
     if self.genres_list.genre():
       self.filter_by_genre(self.genres_list.genre())
       self.stations_list.load_config()
+
+  def copy_url(self):
+    pass
 
   def sync_control_state(self):
     action = self.action_group.get_action('ShoutcastStaredStations')
@@ -182,6 +192,17 @@ class ShoutcastSource(rb.StreamingSource):
   def genres_property_selection_reset(self):
     self.filter_by_genre_clear()
 
+  def do_impl_show_entry_popup(self):
+    self.show_source_popup ("/ShoutcastSourceViewPopup")
+
+  def do_impl_get_status(self):
+    if self.loadmanager.load_progress():
+      (text, progress) = self.loadmanager.load_get_progress()
+      return (_("Loading Shoutcast stations"), text, progress)
+    else:
+      qm = self.genres_list.get_model().get_property("query-model")
+      return (qm.compute_status_normal("%d song", "%d songs"), None, 0.0)
+
   def do_impl_activate(self):
     if not self.activated:
       self.activated = True
@@ -191,5 +212,11 @@ class ShoutcastSource(rb.StreamingSource):
 
   def do_impl_deactivate(self):
     self.save_config()
+
+  def do_impl_get_ui_actions(self):
+    return ["ShoutcastStaredStations"]
+
+  def load_status_changed(self):
+    self.emit('status-changed')
 
 gobject.type_register(ShoutcastSource)

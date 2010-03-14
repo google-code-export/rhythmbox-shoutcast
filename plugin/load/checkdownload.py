@@ -18,14 +18,12 @@ class CheckDownload:
   # 24 hours interval
   check_interval = 24 * 60 * 60
 
-  file_check = None
-  # indicate file completely downloaded
-  has_loaded = False
+  __file_check = None
   # xml file parser (parse and commit data to rhythmdb)
-  catalogue_loader = None
-  
+  __catalogue_loader = None
+
   # download error state
-  error = None
+  __error = None
   
   __callback = None
   __notify_id = 0
@@ -43,35 +41,41 @@ class CheckDownload:
   # run update for local file
   def check_update(self):
     if self.ready_to_update():
-      self.file_check = rb.UpdateCheck()
-      self.file_check.check_for_update(self.file_local, self.file_url, self.update_cb)
+      self.__file_check = rb.UpdateCheck()
+      self.__file_check.check_for_update(self.file_local, self.file_url, self.update_cb)
       return True
     else:
       return False
 
   # get downloading in progress state
   def check_progress(self):
-    if self.error:
+    if self.__error:
       return False
     
-    if self.catalogue_check:
+    if self.__file_check:
       return True
     
-    if self.catalogue_loader:
+    if self.__catalogue_loader:
       return True
 
     return False
   
   # get downloading results: ok/error
   def check_result(self):
-    return self.error
+    return self.__error
   
   # set callback for status notifications
   def check_callback(self, callback):
     self.__callback = callback
+    
+  def check_get_progress(self):
+    if self.load_total_size != 0:
+      return (self.file_url, self.load_current_size / self.load_total_size)
+    else:
+      return (self.file_url, -1)
 
   def set_error(self, e):
-    self.error = e
+    self.__error = e
 
   def ready_to_update(self):
     try:
@@ -82,7 +86,7 @@ class CheckDownload:
 
   def update_cb (self, result):
     try:
-      self.catalogue_check = None
+      self.__file_check = None
       if result is True:
         self.catalogue_download()
       else:
@@ -99,11 +103,11 @@ class CheckDownload:
     debug.log(self.file_local_temp)
     out = open(self.file_local_temp, 'w')
 
-    self.catalogue_loader = rb.ChunkLoader()
-    self.catalogue_loader.get_url_chunks(self.file_url, 1 * 1024, True, self.catalogue_download_chunk_cb, out)
+    self.__catalogue_loader = rb.ChunkLoader()
+    self.__catalogue_loader.get_url_chunks(self.file_url, 1 * 1024, True, self.catalogue_download_chunk_cb, out)
 
   def catalogue_download_chunk_close(self, out):
-    self.catalogue_loader = None
+    self.__catalogue_loader = None
     out.close()
 
   def catalogue_download_chunk_cb (self, result, total, out):
