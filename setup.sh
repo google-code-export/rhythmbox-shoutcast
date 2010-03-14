@@ -29,6 +29,14 @@ install() {
 	cp -rv plugin/* ${DEST}
 }
 
+uninstall() {
+	# gedit plugin directory
+	DEST=~/.gnome2/rhythmbox/plugins/shoutcast/
+
+	# remove currect version of plugin
+	rm -rf ${DEST}
+}
+
 # clean shoutcast cache
 cleanc() {
 	rm -vf ~/.cache/rhythmbox/shoutcast/*
@@ -62,6 +70,8 @@ case "$1" in
 	help)
 		echo $"Usage: $0 {clean|cleandb|cleanc|install|debug}"
 		;;
+	uninstall)
+		uninstall
 	install)
 		install
 		;;
