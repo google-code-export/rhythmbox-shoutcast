@@ -128,8 +128,9 @@ class ShoutcastSource(rb.StreamingSource):
     action = self.action_group.get_action('ShoutcastStaredStations')
     self.filter = action.get_active()
 
-    self.genres_list.save_config()
-    self.stations_list.save_config()
+    if self.genres_list.genre():
+      self.genres_list.save_config()
+      self.stations_list.save_config()
 
     self.load_positions()
 
