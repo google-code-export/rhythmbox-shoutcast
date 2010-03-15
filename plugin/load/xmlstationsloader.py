@@ -77,6 +77,6 @@ class XmlStationsLoader(XmlLoader):
 
     debug.log("Remove old station: " + repr(self.db.entry_get(entry, rhythmdb.PROP_TITLE)))
 
-    self.db.entry_delete(db, entry)
+    self.db.entry_delete(entry)
     
     return False
