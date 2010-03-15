@@ -87,12 +87,10 @@ class EntryView(rb.EntryView):
 
   def save_config(self):
     url = self.get_entry_url()
-    print url
     self.gconf.set_string('/apps/rhythmbox/plugins/shoutcast/stations_entry', url)
 
   def load_config(self):
     url = self.gconf.get_string('/apps/rhythmbox/plugins/shoutcast/stations_entry')
-    print url
     if url:
       entry = self.db.entry_lookup_by_location(url)
       if entry:
