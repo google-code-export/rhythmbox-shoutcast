@@ -18,6 +18,9 @@
 
 import rhythmdb, rb
 
+def entry_lookup_by_location(db, url):
+  return self.db.entry_lookup_by_location(url)
+
 def id_to_entry(db, eid):
   entry = db.entry_lookup_by_id(eid)
   
