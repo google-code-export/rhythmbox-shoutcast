@@ -17,14 +17,12 @@
 """
 
 import rhythmdb
-import xml.sax, xml.sax.handler
-import shutil
-import os, os.path
+import xml.sax, xml.sax.handler, shutil, os, os.path
+import rbdb
+import debug
 
 from xmlloader import *
 from xmlgenreshandler import *
-from db import *
-from debug import *
 
 class XmlGenresLoader(XmlLoader):
 
@@ -54,7 +52,7 @@ class XmlGenresLoader(XmlLoader):
     self.db.commit()
 
   def clean_keywords_db(self, model, path, iter):
-    entry = iter_to_entry(self.db, model, iter)
+    entry = rbdb.iter_to_entry(self.db, model, iter)
     
     self.db.entry_keyword_add(entry, 'old')
 
@@ -72,7 +70,7 @@ class XmlGenresLoader(XmlLoader):
     self.db.commit()
 
   def remove_old_db(self, model, path, iter):
-    entry = iter_to_entry(self.db, model, iter)
+    entry = rbdb.iter_to_entry(self.db, model, iter)
 
     genre = self.db.entry_get(entry, rhythmdb.PROP_GENRE)
     
@@ -103,7 +101,7 @@ class XmlGenresLoader(XmlLoader):
     return False
 
   def remove_stations_db(self, model, path, iter):
-    entry = iter_to_entry(self.db, model, iter)
+    entry = rbdb.iter_to_entry(self.db, model, iter)
 
     self.db.entry_delete(entry)
     

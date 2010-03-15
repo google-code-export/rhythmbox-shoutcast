@@ -18,11 +18,10 @@
 
 import rhythmdb
 import xml.sax, xml.sax.handler, shutil, os
+import rbdb, debug
 
 from xmlloader import *
 from xmlstationshandler import *
-from db import *
-from debug import *
 
 class XmlStationsLoader(XmlLoader):
 
@@ -54,7 +53,7 @@ class XmlStationsLoader(XmlLoader):
     self.db.commit()
 
   def clean_keywords_db(self, query_model, path, iter):
-    entry = iter_to_entry(self.db, query_model, iter)
+    entry = rbdb.iter_to_entry(self.db, query_model, iter)
     
     self.db.entry_keyword_add(entry, 'old')
 
@@ -74,7 +73,7 @@ class XmlStationsLoader(XmlLoader):
     self.db.commit()
 
   def remove_keywords_db(self, model, path, iter):
-    entry = iter_to_entry(self.db, model, iter)
+    entry = rbdb.iter_to_entry(self.db, model, iter)
 
     entry_to_string(self.db, entry)
 

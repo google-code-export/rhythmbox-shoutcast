@@ -17,16 +17,7 @@
 """
 
 import rhythmdb, rb
-import gobject
-import gtk
-import gconf, gnome
-
-import urllib
-import zipfile
-import sys, os.path
-import xml
-import datetime
-import string
+import gobject, gtk, gconf, gnome, urllib, zipfile, sys, os.path, xml, datetime, string
 
 from shoutcastsource import *
 from versioncheck import *

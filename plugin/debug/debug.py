@@ -19,8 +19,6 @@
 import rhythmdb, rb
 import traceback, sys
 
-from db import *
-
 def fe():
   result = ''
   

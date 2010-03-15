@@ -18,9 +18,8 @@
 
 import rb
 import gtk, gconf, gnome
-import debug
+import debug, rbdb
 
-from db import *
 from cellpixbufbutton import *
 
 class EntryView(rb.EntryView):
@@ -55,7 +54,7 @@ class EntryView(rb.EntryView):
     self.set_shadow_type(gtk.SHADOW_IN)
 
   def star_func(self, column, cell, model, iter):
-    entry = iter_to_entry(self.db, model, iter)
+    entry = rbdb.iter_to_entry(self.db, model, iter)
     star = self.db.entry_keyword_has(entry, 'star')
 
     if star:
@@ -66,7 +65,7 @@ class EntryView(rb.EntryView):
     cell.set_property('pixbuf', pixbuf)
 
   def star_click(self, cell, model, path, iter):
-    entry = iter_to_entry(self.db, model, iter)
+    entry = rbdb.iter_to_entry(self.db, model, iter)
     
     star = self.db.entry_keyword_has(entry, 'star')
     if star:
