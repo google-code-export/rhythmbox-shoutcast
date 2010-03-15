@@ -65,7 +65,7 @@ case "$1" in
 		;;
 	debug)
 		install
-		rhythmbox --rhythmdb-file=database.xml --D shoutcast
+		rhythmbox --rhythmdb-file=database.xml -D shoutcast
 		;;
 	help)
 		echo $"Usage: $0 {clean|cleandb|cleanc|install|debug}"
