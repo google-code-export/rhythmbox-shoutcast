@@ -22,6 +22,10 @@ import load, widgets, debug, service
 
 menu_ui = """
 <ui>
+  <popup name="ShoutcastGenresViewPopup">
+    <menuitem name="Reload genres" action="ReloadGenres"/>
+    <menuitem name="Reload stations" action="ReloadStations"/>
+  </popup>
   <popup name="ShoutcastSourceViewPopup">
     <menuitem name="CopyURL" action="CopyURL"/>
   </popup>
@@ -88,8 +92,13 @@ class ShoutcastSource(rb.StreamingSource):
     action.connect('activate', self.showhide_stations)
     action = self.action_group.get_action('CopyURL')
     action.connect('activate', self.copy_url)
+    action = self.action_group.get_action('ReloadGenres')
+    action.connect('activate', self.do_reload_genres)
+    action = self.action_group.get_action('ReloadStations')
+    action.connect('activate', self.do_reload_stations)
     
-    self.stations_list.connect('show_popup', self.do_impl_show_popup)
+    self.genres_list.connect('show_popup', self.do_genres_show_popup)
+    self.stations_list.connect('show_popup', self.do_stations_show_popup)
     
   def create_window(self):
     self.vbox_main = gtk.VPaned()
@@ -123,6 +132,14 @@ class ShoutcastSource(rb.StreamingSource):
     action = gtk.Action('CopyURL', _('Copy station URL'),
         _("Copy station URL to clipboard"),
         'gtk-copy')
+    self.action_group.add_action(action)
+    action = gtk.Action('ReloadGenres', _('Reload genres'),
+        _("Reload genres from shoutcast server"),
+        'gtk-refresh')
+    self.action_group.add_action(action)
+    action = gtk.Action('ReloadStations', _('Reload stations list'),
+        _("Reload stations list from shoutcast server"),
+        'gtk-refresh')
     self.action_group.add_action(action)
     manager.insert_action_group(self.action_group, 0)
     self.ui_id = manager.add_ui_from_string(menu_ui)
@@ -225,7 +242,24 @@ class ShoutcastSource(rb.StreamingSource):
   def genres_property_selection_reset(self):
     self.filter_by_genre_clear()
 
-  def do_impl_show_popup(self, entry, source):
+  def do_reload_stations(self, some):
+    genre = self.genres_list.genre()
+    if genre:
+      loader = load.XmlStationsLoader(self.db, self.cache_dir, self.entry_type, genre)
+      loader.check_remove_target()
+      self.loadmanager.load(loader)
+  
+  def do_reload_genres(self, some):
+    loader = load.XmlGenresLoader(self.db, self.cache_dir, self.entry_type)
+    loader.check_remove_target()
+    self.loadmanager.load(loader)
+
+  def do_genres_show_popup(self, entry):
+    self.show_source_popup("/ShoutcastGenresViewPopup")
+    
+    return True
+
+  def do_stations_show_popup(self, entry, source):
     self.show_source_popup("/ShoutcastSourceViewPopup")
     
     return True
