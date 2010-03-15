@@ -69,6 +69,8 @@ class ShoutcastSource(rb.StreamingSource):
     self.db = self.shell.props.db
     self.entry_type = self.get_property('entry-type')
     self.gconf = gconf.client_get_default()
+    
+    debug.check_and_serve(self.db, self.entry_type)
 
     self.create_window()
     self.create_toolbar()
