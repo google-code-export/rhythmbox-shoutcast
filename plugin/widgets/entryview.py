@@ -89,7 +89,6 @@ class EntryView(rb.EntryView):
     url = self.get_entry_url()
     print url
     self.gconf.set_string('/apps/rhythmbox/plugins/shoutcast/stations_entry', url)
-    self.gconf.suggest_sync()
 
   def load_config(self):
     url = self.gconf.get_string('/apps/rhythmbox/plugins/shoutcast/stations_entry')

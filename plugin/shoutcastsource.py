@@ -159,6 +159,8 @@ class ShoutcastSource(rb.StreamingSource):
     if self.stations_list.get_entry_url():
       self.stations_list.save_config()
 
+    self.gconf.suggest_sync()
+
     self.load_positions()
 
   def load_positions(self):
