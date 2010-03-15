@@ -80,12 +80,11 @@ class XmlGenresLoader(XmlLoader):
     self.db.query_append(query, (rhythmdb.QUERY_PROP_LIKE, rhythmdb.PROP_KEYWORD, 'star'))
     query_model = self.db.query_model_new_empty()
     self.db.do_full_query_parsed(query_model, query)
-    stars_amount = query_model.get_size()
+    stars_here = query_model.get_iter_first()
 
     # remove 'genre' only if here no favorite stations left
-    if stars_amount == 0:
-      print "Remove old genre's: " + genre
-      debug.entry_to_string(self.db, entry)
+    if not stars_here:
+      debug.log("Remove old genre and all stations related to it: " + genre)
       self.db.entry_delete(entry)
 
     query = self.db.query_new()
@@ -94,7 +93,7 @@ class XmlGenresLoader(XmlLoader):
     self.db.query_append(query, (rhythmdb.QUERY_PROP_LIKE, rhythmdb.PROP_KEYWORD, 'station'))
     self.db.query_append(query, (rhythmdb.QUERY_PROP_NOT_LIKE, rhythmdb.PROP_KEYWORD, 'star'))
     query_model = self.db.query_model_new_empty()
-    self.db.do_full_query_parsed(query_model, query)    
+    self.db.do_full_query_parsed(query_model, query)
     query_model.foreach(self.remove_stations_db)
     
     return False
@@ -102,6 +101,7 @@ class XmlGenresLoader(XmlLoader):
   def remove_stations_db(self, model, path, iter):
     entry = rbdb.iter_to_entry(self.db, model, iter)
 
+    debug.log("Remove old genre and all stations related to it: " + repr(self.db.entry_get(entry, rhythmdb.PROP_TITLE)))
     self.db.entry_delete(entry)
     
     return False

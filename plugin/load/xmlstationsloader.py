@@ -75,8 +75,8 @@ class XmlStationsLoader(XmlLoader):
   def remove_keywords_db(self, model, path, iter):
     entry = rbdb.iter_to_entry(self.db, model, iter)
 
-    entry_to_string(self.db, entry)
+    debug.log("Remove old station: " + repr(self.db.entry_get(entry, rhythmdb.PROP_TITLE)))
 
-    self.db.entry_delete(entry)
+    self.db.entry_delete(db, entry)
     
     return False
