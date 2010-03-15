@@ -18,7 +18,7 @@
 
 import os, shutil, time, sys, gobject
 import rb
-import debug
+import debug, service
 
 class CheckDownload:
   
@@ -90,6 +90,9 @@ class CheckDownload:
     else:
       return (self.file_url, -1)
 
+  def check_remove_target(self):
+    os.remove(self.file_local)
+
   def set_error(self, e):
     self.__error = e
 
@@ -108,7 +111,7 @@ class CheckDownload:
       else:
         self.set_error('error on update_cb')
     except:
-      self.set_error(debug.fe())
+      self.set_error(service.fe())
       
     self.__notify_status_changed()
 
@@ -141,7 +144,7 @@ class CheckDownload:
         self.__load_current_size += len(result)
         self.__load_total_size = total
     except:
-      self.set_error(debug.fe())
+      self.set_error(service.fe())
 
     self.__notify_status_changed()
 
