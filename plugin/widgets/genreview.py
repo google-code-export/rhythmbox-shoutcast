@@ -46,6 +46,7 @@ class GenresView(rb.PropertyView):
 
   def save_config(self):
     self.gconf.set_list('/apps/rhythmbox/plugins/shoutcast/genres_selection', 'string', self.get_selection())
+    self.gconf.suggest_sync()
 
   def load_config(self):
     self.set_selection(self.gconf.get_list('/apps/rhythmbox/plugins/shoutcast/genres_selection', 'string'))

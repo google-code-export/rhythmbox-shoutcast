@@ -140,6 +140,9 @@ class ShoutcastSource(rb.StreamingSource):
       self.genres_list.save_config()
     if self.stations_list.get_entry_url():
       self.stations_list.save_config()
+      
+    self.gconf.suggest_sync()
+
 
   def do_impl_get_entry_view(self):
     return self.stations_list
