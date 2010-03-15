@@ -18,7 +18,7 @@
 
 import rhythmdb
 import xml.sax, xml.sax.handler, datetime, urllib
-import debug
+import debug, rbdb
 
 '''
 

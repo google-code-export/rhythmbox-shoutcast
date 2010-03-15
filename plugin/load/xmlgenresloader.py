@@ -18,8 +18,7 @@
 
 import rhythmdb
 import xml.sax, xml.sax.handler, shutil, os, os.path
-import rbdb
-import debug
+import rbdb, debug
 
 from xmlloader import *
 from xmlgenreshandler import *
@@ -86,7 +85,7 @@ class XmlGenresLoader(XmlLoader):
     # remove 'genre' only if here no favorite stations left
     if stars_amount == 0:
       print "Remove old genre's: " + genre
-      entry_to_string(self.db, entry)
+      debug.entry_to_string(self.db, entry)
       self.db.entry_delete(entry)
 
     query = self.db.query_new()
