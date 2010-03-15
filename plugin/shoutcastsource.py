@@ -18,7 +18,7 @@
 
 import rb, rhythmdb
 import gobject, os, gtk, gconf, gnome
-import load, widgets, debug
+import load, widgets, debug, service
 
 menu_ui = """
 <ui>
@@ -70,7 +70,7 @@ class ShoutcastSource(rb.StreamingSource):
     self.entry_type = self.get_property('entry-type')
     self.gconf = gconf.client_get_default()
     
-    debug.check_and_serve(self.db, self.entry_type)
+    service.check_and_serve(self.db, self.entry_type)
 
     self.create_window()
     self.create_toolbar()

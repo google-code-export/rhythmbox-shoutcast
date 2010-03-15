@@ -146,11 +146,11 @@ class XmlLoader(CheckDownload):
       if self.catalogue_loader:
         self.catalogue_loader.cancel()
       self.close_and_remove()
-      self.set_error(debug.fe())
+      self.set_error(service.fe())
     except:
       if self.catalogue_loader:
         self.catalogue_loader.cancel()
-      self.set_error(debug.fe())
+      self.set_error(service.fe())
 
     self.__notify_status_changed()
 

@@ -18,9 +18,9 @@
 
 import rhythmdb, rb
 import gobject, gtk, gconf, gnome, urllib, zipfile, sys, os.path, xml, datetime, string
+import service
 
 from shoutcastsource import *
-from versioncheck import *
 
 class Shoutcast(rb.Plugin):
 
@@ -40,7 +40,7 @@ class Shoutcast(rb.Plugin):
 
     self.cache_dir = os.path.join(rb.user_cache_dir(), 'shoutcast')
     
-    self.versioncheck = VersionCheck(self.cache_dir, self.find_file("shoutcast.rb-plugin"))    
+    self.versioncheck = service.VersionCheck(self.cache_dir, self.find_file("shoutcast.rb-plugin"))    
     self.versioncheck.check()
 
     group = rb.rb_source_group_get_by_name ("internet")

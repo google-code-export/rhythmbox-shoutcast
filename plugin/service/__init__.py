@@ -16,18 +16,6 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import rhythmdb, rb
-import traceback, sys
-
-def entry_to_string(db, entry):
-  out = ''
-  out += "id: " + repr(db.entry_get(entry, rhythmdb.PROP_ENTRY_ID)) + '\n'
-  out += "title: " + repr(db.entry_get(entry, rhythmdb.PROP_TITLE)) + '\n'
-  out += "genre: " + repr(db.entry_get(entry, rhythmdb.PROP_GENRE)) + '\n'
-  out += "url: " + repr(db.entry_get(entry, rhythmdb.PROP_LOCATION)) + '\n'
-  out += "keyword: " + repr(db.entry_get(entry, rhythmdb.PROP_KEYWORD)) + '\n'
-  
-  print out
-
-def log(log):
-  print log
+from error import *
+from service import *
+from versioncheck import *
