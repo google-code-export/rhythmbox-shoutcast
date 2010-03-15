@@ -93,9 +93,9 @@ class EntryView(rb.EntryView):
     url = self.gconf.get_string('/apps/rhythmbox/plugins/shoutcast/stations_entry')
     if url:
       entry = self.db.entry_lookup_by_location(url)
-      self.select_entry(entry)
-      # hack
-      gobject.idle_add(self.hack_scroll_to_entry, entry)
+      if entry:
+        self.select_entry(entry)
+        gobject.idle_add(self.hack_scroll_to_entry, entry)
   
   def hack_scroll_to_entry(self, entry):
     self.scroll_to_entry(entry)
