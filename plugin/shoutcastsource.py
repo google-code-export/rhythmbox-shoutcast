@@ -51,14 +51,17 @@ class ShoutcastSource(rb.StreamingSource):
   entry_type = None
   cache_dir = None
   plugin = None
-  loadmanager = load.LoadManager()
+  loadmanager = None
   activated = False
+  main_window = False
   filter = False
+  vbox_main = None
+  genres_list = None
+  stations_list = None
+  load_complete = False
   
   def __init__ (self):
     rb.Source.__init__(self, name=_("Shoutcast"))
-    
-    self.loadmanager.load_callback(self.load_status_changed)
 
   def do_set_property(self, property, value):
     if property.name == 'plugin':
@@ -73,6 +76,32 @@ class ShoutcastSource(rb.StreamingSource):
     self.db = self.shell.props.db
     self.entry_type = self.get_property('entry-type')
     self.gconf = gconf.client_get_default()
+
+    self.loadmanager = load.LoadManager()
+    self.loadmanager.load_callback(self.load_status_changed)
+
+    self.db_default_query()    
+
+  def db_connect_signal(self, db):
+    db.connect('load-complete', self.db_load_complete)
+
+  def db_default_query(self):
+    genres_query = self.db.query_new()
+    self.db.query_append(genres_query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type))
+    genres_query_model = self.db.query_model_new_empty ()
+    self.db.do_full_query_parsed(genres_query_model, genres_query)
+    self.set_property('query-model', genres_query_model)
+    
+  def db_load_complete(self, db):
+    self.load_complete = True
+    
+    if self.activated:
+      self.create_mainwindow()
+    else:
+      self.create_splashscreen()
+    
+  def create_mainwindow(self):
+    self.main_window = True
     
     service.check_and_serve(self.db, self.entry_type)
 
@@ -84,6 +113,23 @@ class ShoutcastSource(rb.StreamingSource):
     self.sync_control_state()
     
     self.connect_all()
+
+  def create_splashscreen(self):
+    if self.vbox_main:
+      self.remove(self.vbox_main)
+      self.vbox_main.hide_all()
+      self.vbox_main = None
+
+    self.vbox_main = gtk.VBox()
+    
+    label_1 = gtk.Label('Loading...')
+    self.vbox_main.pack_start(label_1)
+    label_2 = gtk.Label('If you just added Shoutcast plugin, please restart the rhythmbox player due to bug in rhythmdb.')
+    self.vbox_main.pack_start(label_2)
+    
+    self.vbox_main.show_all()
+    
+    self.add(self.vbox_main)
 
   def connect_all(self):
     self.genres_list.connect('property-selected', self.genres_property_selected)
@@ -101,6 +147,11 @@ class ShoutcastSource(rb.StreamingSource):
     self.stations_list.connect('show_popup', self.do_stations_show_popup)
     
   def create_window(self):
+    if self.vbox_main:
+      self.remove(self.vbox_main)
+      self.vbox_main.hide_all()
+      self.vbox_main = None
+
     self.vbox_main = gtk.VPaned()
     self.genres_list = widgets.GenresView(self.db, rhythmdb.PROP_GENRE, _("Genres"))
     self.stations_list = widgets.EntryView(self.db, self.shell.get_player(), self.plugin)
@@ -162,7 +213,6 @@ class ShoutcastSource(rb.StreamingSource):
       
     self.gconf.suggest_sync()
 
-
   def do_impl_get_entry_view(self):
     return self.stations_list
 
@@ -205,8 +255,7 @@ class ShoutcastSource(rb.StreamingSource):
       self.db.query_append(genres_query, (rhythmdb.QUERY_PROP_LIKE, rhythmdb.PROP_KEYWORD, 'star'))
     genres_query_model = self.db.query_model_new_empty ()
     self.db.do_full_query_parsed(genres_query_model, genres_query)
-    genres_props_model = self.genres_list.get_model()
-    genres_props_model.set_property('query-model', genres_query_model)
+    self.genres_list.get_model().set_property('query-model', genres_query_model)
 
     # do not update genres when filter active (no need, favorite mode mean local stations)
     if not self.filter:
@@ -269,18 +318,25 @@ class ShoutcastSource(rb.StreamingSource):
       (text, progress) = self.loadmanager.load_get_progress()
       return (_("Loading Shoutcast stations"), text, progress)
     else:
-      qm = self.genres_list.get_model().get_property("query-model")
+      qm = self.get_property("query-model")
       return (qm.compute_status_normal("%d song", "%d songs"), None, 1)
 
   def do_impl_activate(self):
     if not self.activated:
       self.activated = True
+      
       self.create()
+      
+      if self.load_complete:
+        self.create_mainwindow()
+      else:
+        self.create_splashscreen()
 
     rb.Source.do_impl_activate(self)
 
   def do_impl_deactivate(self):
-    self.save_config()
+    if self.main_window:
+      self.save_config()
 
   def do_impl_get_ui_actions(self):
     return ["ShoutcastStaredStations"]
