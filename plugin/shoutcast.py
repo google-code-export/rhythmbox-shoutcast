@@ -56,12 +56,12 @@ class Shoutcast(rb.Plugin):
     icon = gtk.gdk.pixbuf_new_from_file_at_size(self.find_file("shoutcast.png"), width, height)
 
     self.source = gobject.new(ShoutcastSource,
-                        shell = self.shell,
-                        plugin = self,
-                       icon = icon,
-                       entry_type = self.entry_type,
-                       source_group = group,
-                       cache_dir = self.cache_dir)
+                              shell = self.shell,
+                              plugin = self,
+                              icon = icon,
+                              entry_type = self.entry_type,
+                              source_group = group,
+                              cache_dir = self.cache_dir)
 
     shell.register_entry_type_for_source(self.source, self.entry_type)
     shell.append_source(self.source, None)
