@@ -43,11 +43,23 @@ class CellPixbufButton(gtk.GenericCellRenderer):
       raise AttributeError, 'unknown property %s' % property.name
 
   def on_get_size(self, widget, cell_area):
-    xoffset = 0
-    yoffset = 0
-    width = self.pixbuf.get_width()
-    height = self.pixbuf.get_height()
-    return (xoffset, yoffset, width, height)
+    x_offset = 0
+    y_offset = 0
+    pixbuf_width = self.pixbuf.get_width()
+    pixbuf_height = self.pixbuf.get_height()
+
+    calc_width = self.get_property('xpad') * 2 + pixbuf_width;
+    calc_height = self.get_property('ypad') * 2 + pixbuf_height;
+
+    if cell_area and pixbuf_width > 0 and pixbuf_height > 0:
+      x_offset = self.get_property('xalign')  * (cell_area.width - calc_width - (2 * self.get_property('xpad')))
+      x_offset = max(x_offset, 0) + self.get_property('xpad')
+      x_offset = int(x_offset)
+      y_offset = self.get_property('yalign') * (cell_area.height - calc_height - (2 * self.get_property('ypad')))
+      y_offset = max(y_offset, 0) + self.get_property('ypad')
+      y_offset = int(y_offset)
+    
+    return (x_offset, y_offset, calc_width, calc_height)
 
   def on_render(self, window, widget, background_area, cell_area, expose_area, flags):
     (xoffset, yoffset, width, height) = self.get_size(widget, cell_area)

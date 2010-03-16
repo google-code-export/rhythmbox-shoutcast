@@ -45,8 +45,7 @@ class EntryView(rb.EntryView):
     column.pack_start(cell_render)
     column.set_cell_data_func(cell_render, self.star_func)
     column.set_sizing (gtk.TREE_VIEW_COLUMN_FIXED)
-    #column.set_fixed_width(self.pixs[0].get_width())
-    column.set_fixed_width(50)
+    column.set_fixed_width(self.pixs[0].get_width() + 5)
     self.append_column_custom(column, "", "STAR")
 
     self.set_columns_clickable(False)
