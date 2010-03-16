@@ -82,6 +82,9 @@ class ShoutcastSource(rb.StreamingSource):
 
     self.db_default_query()    
 
+    self.genres_list = widgets.GenresView(self.db, rhythmdb.PROP_GENRE, _("Genres"))
+    self.stations_list = widgets.EntryView(self.db, self.shell.get_player(), self.plugin)
+
   def db_connect_signal(self, db):
     db.connect('load-complete', self.db_load_complete)
 
@@ -153,8 +156,6 @@ class ShoutcastSource(rb.StreamingSource):
       self.vbox_main = None
 
     self.vbox_main = gtk.VPaned()
-    self.genres_list = widgets.GenresView(self.db, rhythmdb.PROP_GENRE, _("Genres"))
-    self.stations_list = widgets.EntryView(self.db, self.shell.get_player(), self.plugin)
     vbox_1 = gtk.VBox()
     vbox_1.pack_start(self.genres_list)
     self.vbox_main.pack1(vbox_1, True, False)
