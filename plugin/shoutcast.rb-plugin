@@ -2,7 +2,7 @@
 Loader=python
 Module=shoutcast
 IAge=1
-Version=1.2.2
+Version=1.2.3
 Name=Shoutcast
 Description=Adds support to Rhythmbox for playing and shoutcast radio
 Authors=Alexey Kuznetsov <ak@axet.ru>
