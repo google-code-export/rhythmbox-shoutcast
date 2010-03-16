@@ -135,9 +135,9 @@ class ShoutcastSource(rb.StreamingSource):
     self.genres_list.connect('property-selected', self.genres_property_selected)
     self.genres_list.connect('property-selection-reset', self.genres_property_selection_reset)      
     action = self.action_group.get_action('ShoutcastStaredStations')
-    action.connect('activate', self.showhide_stations)
+    action.connect('activate', self.do_showhide_stations)
     action = self.action_group.get_action('CopyURL')
-    action.connect('activate', self.copy_url)
+    action.connect('activate', self.do_copy_url)
     action = self.action_group.get_action('ReloadGenres')
     action.connect('activate', self.do_reload_genres)
     action = self.action_group.get_action('ReloadStations')
@@ -216,7 +216,7 @@ class ShoutcastSource(rb.StreamingSource):
   def do_impl_get_entry_view(self):
     return self.stations_list
 
-  def showhide_stations(self, control):
+  def do_showhide_stations(self, control):
     filter = self.filter
     
     action = self.action_group.get_action('ShoutcastStaredStations')
@@ -240,7 +240,7 @@ class ShoutcastSource(rb.StreamingSource):
       self.filter_by_genre(self.genres_list.genre())
       self.stations_list.load_config()
 
-  def copy_url(self, action):
+  def do_copy_url(self, action):
     clipboard = gtk.clipboard_get()
     clipboard.set_text(self.stations_list.get_entry_url())
 
