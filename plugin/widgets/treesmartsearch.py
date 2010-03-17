@@ -43,6 +43,8 @@ class TreeSmartSearch:
       return True
   
   def set_model(self, model):
+    self.searchentry.hide_entry()
+    
     self.model = model
     self.treeviewmodel = self.db.query_model_new_empty()
     query = self.db.query_new()

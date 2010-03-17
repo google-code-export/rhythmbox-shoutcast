@@ -42,11 +42,15 @@ class SearchEntry(gtk.Frame):
     return False
 
   def key_release_event(self, widget, event):
-    if event.keyval == gtk.keysyms.Escape:
+    print event.keyval, gtk.gdk.keyval_name(event.keyval)
+    if event.keyval in [gtk.keysyms.Escape, gtk.keysyms.Return, gtk.keysyms.KP_Enter]:
       self.hide_entry()
       return True
         
     return False
+
+  def empty(self):
+    return len(self.search_entry.get_text()) == 0
 
   def scope_event(self, event):
     if gtk.gdk.keyval_name(event.keyval) in string.ascii_letters:
@@ -55,8 +59,12 @@ class SearchEntry(gtk.Frame):
     if gtk.gdk.keyval_name(event.keyval) in string.digits:
       return True
 
-    if event.keyval == gtk.keysyms.BackSpace:
+    if event.keyval in [gtk.keysyms.BackSpace]:
       return True
+
+    if not self.empty():
+      if event.keyval in [gtk.keysyms.space, gtk.keysyms.Return, gtk.keysyms.KP_Enter]:
+        return True
 
     return False 
 
