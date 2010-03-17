@@ -2,8 +2,6 @@ import rhythmdb
 import gtk
 import rbdb
 
-from treesmartsearchwindow import *
-
 class TreeSmartSearch:
   
   # GtkTreeView
