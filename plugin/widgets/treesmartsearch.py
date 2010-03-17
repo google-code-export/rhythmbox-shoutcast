@@ -18,6 +18,8 @@ class TreeSmartSearch:
       self.treeview = widget
   
   def connect_to_tree(self, container, searchentry):
+    self.container = container
+    
     container.foreach(self.catch_treecontrol)
     
     if not self.treeview:
@@ -55,15 +57,15 @@ class TreeSmartSearch:
     self.set_model(model)
     return self.treeviewmodel
 
-  def move_up(self):
-    pass
-
-  def move_down(self):
-    pass
-  
   def new_filter_text(self, text):
     query = self.db.query_new()
     self.db.query_append(query, (rhythmdb.QUERY_PROP_LIKE, rhythmdb.PROP_TITLE, text))
     self.treeviewmodel.set_query(query)
     self.treeviewmodel.set_property('base-model', self.model)
     self.treeviewmodel.reapply_query(True)
+    
+    url = self.container.get_entry_url()
+    if url:
+      entry = self.db.entry_lookup_by_location(url)
+      if entry:
+        self.container.scroll_to_entry(entry)
