@@ -53,6 +53,8 @@ class EntryView(rb.EntryView):
     self.set_columns_clickable(False)
     self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
     self.set_shadow_type(gtk.SHADOW_IN)
+    
+    self.set_sorting_order("Title", gtk.SORT_ASCENDING)
 
   def star_func(self, column, cell, model, iter):
     entry = rbdb.iter_to_entry(self.db, model, iter)
