@@ -159,8 +159,14 @@ class ShoutcastSource(rb.StreamingSource):
     vbox_1 = gtk.VBox()
     vbox_1.pack_start(self.genres_list)
     self.vbox_main.pack1(vbox_1, True, False)
-    self.vbox_main.pack2(self.stations_list, True, False)
+    vbox_2 = gtk.VBox()
+    vbox_2.pack_start(self.stations_list)
+    searchentry = widgets.SearchEntry()
+    vbox_2.pack_start(searchentry, False)
+    self.vbox_main.pack2(vbox_2, True, False)
     self.vbox_main.show_all()
+    
+    self.stations_list.set_searchentry(searchentry)
     
     self.add(self.vbox_main)
 
