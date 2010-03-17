@@ -76,6 +76,8 @@ class VersionCheck(load.CheckDownload):
         self.notify(_("Rhythmbox-Shoutcast plugin"),
                     _("New version available: ") + version + _("\n\nPlease visit " + self.home_url));
         break
+      elif int(vs_local[i]) > int(vs_site[i]):
+        break
 
   def notify(self, message, version):
     try:
