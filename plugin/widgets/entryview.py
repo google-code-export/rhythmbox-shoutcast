@@ -21,11 +21,13 @@ import gtk, gconf, gnome
 import debug, rbdb
 
 from cellpixbufbutton import *
+from treesmartsearch import *
 
 class EntryView(rb.EntryView):
 
   plugin = None
   pixs = []
+  treesmartsearch = None
 
   def __init__(self, db, player, plugin):
     rb.EntryView.__init__(self,db, player, None, False, False)
@@ -84,6 +86,11 @@ class EntryView(rb.EntryView):
     else:
       return None
 
+  def set_searchentry(self, searchentry):
+    self.searchentry = searchentry
+    self.treesmartsearch = TreeSmartSearch(self.db)
+    self.treesmartsearch.connect_to_tree(self, searchentry)
+
   def save_config(self):
     url = self.get_entry_url()
     self.gconf.set_string('/apps/rhythmbox/plugins/shoutcast/stations_entry', url)
@@ -98,3 +105,6 @@ class EntryView(rb.EntryView):
   
   def hack_scroll_to_entry(self, entry):
     self.scroll_to_entry(entry)
+
+  def set_model(self, model):
+    rb.EntryView.set_model(self, self.treesmartsearch.filter_model(model))
