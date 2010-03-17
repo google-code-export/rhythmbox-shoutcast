@@ -42,7 +42,6 @@ class SearchEntry(gtk.Frame):
     return False
 
   def key_release_event(self, widget, event):
-    print event.keyval, gtk.gdk.keyval_name(event.keyval)
     if event.keyval in [gtk.keysyms.Escape, gtk.keysyms.Return, gtk.keysyms.KP_Enter]:
       self.hide_entry()
       return True
@@ -84,8 +83,9 @@ class SearchEntry(gtk.Frame):
     if event:
       self.search_entry.event(event)
   
-  def icon_release(self):
-    pass
+  def icon_release(self, window, icon_pos, event):
+    if icon_pos == gtk.ENTRY_ICON_SECONDARY:
+      self.hide_entry()
   
   def process_event(self, event):
     self.search_entry.event(event)
