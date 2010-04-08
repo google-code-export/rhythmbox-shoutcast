@@ -18,6 +18,7 @@
 install() {
 	# gedit plugin directory
 	DEST=~/.gnome2/rhythmbox/plugins/shoutcast/
+	SOURCE=$(dirname $0)
 
 	# remove currect version of plugin
 	rm -rf ${DEST}
@@ -26,7 +27,7 @@ install() {
 	mkdir -p ${DEST}
 
 	# install currect verion of plugin
-	cp -rv plugin/* ${DEST}
+	cp -rv ${SOURCE}/plugin/* ${DEST}
 }
 
 uninstall() {
