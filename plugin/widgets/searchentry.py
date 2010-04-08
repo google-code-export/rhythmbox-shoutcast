@@ -70,8 +70,6 @@ class SearchEntry(gtk.Frame):
   def hide_entry(self):
     self.hide()
     self.search_entry.set_text('')
-    
-    self.__focus.grab_focus()
 
   def show_entry(self, event = None):
     self.show()
