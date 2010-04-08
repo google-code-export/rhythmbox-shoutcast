@@ -58,10 +58,10 @@ class SearchEntry(gtk.Frame):
     if gtk.gdk.keyval_name(event.keyval) in string.digits:
       return True
 
-    if event.keyval in [gtk.keysyms.BackSpace]:
-      return True
-
     if not self.empty():
+      if event.keyval in [gtk.keysyms.BackSpace]:
+        return True
+    
       if event.keyval in [gtk.keysyms.space, gtk.keysyms.Return, gtk.keysyms.KP_Enter]:
         return True
 
