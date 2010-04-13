@@ -40,10 +40,10 @@ class Shoutcast(rb.Plugin):
     self.versioncheck = service.VersionCheck(self.cache_dir, self.find_file("shoutcast.rb-plugin"))    
     self.versioncheck.check()
 
-    group = rb.rb_source_group_get_by_name ("internet")
+    group = rb.rb_source_group_get_by_name ("library")
     if not group:
-      group = rb.rb_source_group_register ("internet",
-                                           _("Internet"),
+      group = rb.rb_source_group_register ("library",
+                                           _("Library"),
                                            rb.SOURCE_GROUP_CATEGORY_FIXED)
 
     self.entry_type = self.db.entry_register_type("ShoutcastEntryType")
