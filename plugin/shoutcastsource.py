@@ -82,7 +82,7 @@ class ShoutcastSource(rb.StreamingSource):
 
     self.db_default_query()    
 
-    self.genres_list = widgets.GenresView(self.db, rhythmdb.PROP_GENRE, _("Genres"))
+    self.genres_list = widgets.GenresView(self.db, self.entry_type)
     self.stations_list = widgets.EntryView(self.db, self.shell.get_player(), self.plugin)
 
   def db_connect_signal(self, db):
@@ -256,13 +256,7 @@ class ShoutcastSource(rb.StreamingSource):
     action.set_active(self.filter)
 
   def filter_genres_default_query(self):
-    genres_query = self.db.query_new()
-    self.db.query_append(genres_query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type))
-    if self.filter:
-      self.db.query_append(genres_query, (rhythmdb.QUERY_PROP_LIKE, rhythmdb.PROP_KEYWORD, 'star'))
-    genres_query_model = self.db.query_model_new_empty ()
-    self.db.do_full_query_parsed(genres_query_model, genres_query)
-    self.genres_list.get_model().set_property('query-model', genres_query_model)
+    self.genres_list.do_query(self.filter)
 
     # do not update genres when filter active (no need, favorite mode mean local stations)
     if not self.filter:
