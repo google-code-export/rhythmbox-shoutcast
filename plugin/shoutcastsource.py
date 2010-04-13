@@ -61,7 +61,7 @@ class ShoutcastSource(rb.StreamingSource):
   load_complete = False
   
   def __init__ (self):
-    rb.Source.__init__(self, name=_("Shoutcast"))
+    rb.StreamingSource.__init__(self, name=_("Shoutcast"))
 
   def do_set_property(self, property, value):
     if property.name == 'plugin':
