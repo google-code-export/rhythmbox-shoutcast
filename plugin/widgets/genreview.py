@@ -17,24 +17,65 @@
 """
 
 import rb, rhythmdb
-import gobject, gconf, gnome, os, gtk
+import gobject, gconf, gnome, os, gtk, gettext, pango
 
 class GenresView(rb.PropertyView):
 
   db = None
   prop = None
   name = None
+  filter = False
   
-  def __init__ (self, db, prop, name):
-    rb.PropertyView.__init__(self, db, prop, name)
+  def __init__ (self, db, entry_type):
+    rb.PropertyView.__init__(self, db, rhythmdb.PROP_GENRE, _("Genres"))
 
     self.db = db
-    self.prop = prop
-    self.name = name
+    self.entry_type = entry_type
     self.gconf = gconf.client_get_default()
 
     self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
     self.set_shadow_type(gtk.SHADOW_IN)
+    
+    cell_render = gtk.CellRendererText()
+    column = gtk.TreeViewColumn()
+    column.pack_start(cell_render)
+    column.set_cell_data_func(cell_render, self.data_func)
+    column.set_sizing (gtk.TREE_VIEW_COLUMN_FIXED)
+    column.set_title (_("Genres"))
+    self.append_column_custom(column)
+
+  def data_func(self, column,renderer, tree_model, iter):
+    (title, is_all, number) = tree_model.get(iter, rhythmdb.PROPERTY_MODEL_COLUMN_TITLE, rhythmdb.PROPERTY_MODEL_COLUMN_PRIORITY, rhythmdb.PROPERTY_MODEL_COLUMN_NUMBER)
+
+    if is_all:
+      nodes = tree_model.iter_n_children(None)
+      nodes -= 1
+      
+      fmt = gettext.ngettext("%d genre (%d)", "All %d genres (%d)", nodes)
+      str = fmt % (nodes, number)
+    else:
+      
+      if not self.filter:
+        number -= 1
+        
+      if number == 0:
+        str = ("%s") % (title)
+      else:
+        str = ("%s (%d)") % (title, number)
+
+    renderer.set_property('text', str)
+    renderer.set_property('weight', is_all and pango.WEIGHT_BOLD or number == 0 and pango.WEIGHT_THIN or pango.WEIGHT_NORMAL)
+
+  def do_query(self, filter):
+    genres_query = self.db.query_new()
+    self.db.query_append(genres_query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type))
+    if filter:
+      self.db.query_append(genres_query, (rhythmdb.QUERY_PROP_LIKE, rhythmdb.PROP_KEYWORD, 'star'))
+    genres_query_model = self.db.query_model_new_empty ()
+    self.db.do_full_query_parsed(genres_query_model, genres_query)
+    self.get_model().set_property('query-model', genres_query_model)
+    
+    self.filter = filter
 
   def genre(self):
     genres = self.get_selection()
