@@ -2,6 +2,8 @@ import rhythmdb
 import xml.sax, xml.sax.handler, shutil, os, os.path
 import rbdb, debug
 
+# one more check requred: items not marked as station or genre
+
 def check_for_damage(db, entry_type):
   query = db.query_new()
   db.query_append(query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, entry_type))
