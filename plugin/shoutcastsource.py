@@ -59,6 +59,7 @@ class ShoutcastSource(rb.StreamingSource):
   genres_list = None
   stations_list = None
   load_complete = False
+  info_available_id = 0
   
   def __init__ (self):
     rb.StreamingSource.__init__(self, name=_("Shoutcast"))
@@ -148,6 +149,9 @@ class ShoutcastSource(rb.StreamingSource):
     
     self.genres_list.connect('show_popup', self.do_genres_show_popup)
     self.stations_list.connect('show_popup', self.do_stations_show_popup)
+    
+    player = self.shell.get_property('shell-player')
+    player.connect('playing-source-changed', self.playing_source_changed_cb)
     
   def create_window(self):
     if self.vbox_main:
@@ -344,5 +348,20 @@ class ShoutcastSource(rb.StreamingSource):
 
   def load_status_changed(self):
     self.emit('status-changed')
+
+  def playing_source_changed_cb(self, player, source):
+    backend = player.get_property('player')
+    
+    if not self.info_available_id:
+      self.info_available_id = backend.connect('info', self.info_available_cb)
+    else:
+      backend.disconnect(self.info_available_id)
+      self.info_available_id = 0
+
+  def info_available_cb(self, backend, uri, field, value):
+    if field == 0: # RB_METADATA_FIELD_TITLE:
+      self.set_streaming_title(value)
+    elif field == 1: # RB_METADATA_FIELD_ARTIST
+      self.streaming_artist(value)
 
 gobject.type_register(ShoutcastSource)
