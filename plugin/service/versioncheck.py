@@ -66,7 +66,9 @@ class VersionCheck(load.CheckDownload):
 
   def version_load(self):
     file = open(self.file_local)
-    version = file.readline()
+    version = file.readline().strip()
+    
+    description = '\n'.join(file.readlines()).strip()
     
     vs_site = version.split('.')
     vs_local = self.version.split('.')
@@ -74,7 +76,8 @@ class VersionCheck(load.CheckDownload):
     for i in range(3):
       if int(vs_local[i]) < int(vs_site[i]):
         self.notify(_("Rhythmbox-Shoutcast plugin"),
-                    _("New version available: ") + version + _("\n\nPlease visit " + self.home_url));
+                    _("New version available: ") + version +
+                    '\n\n' + description + _("\n\nPlease visit " + self.home_url));
         break
       elif int(vs_local[i]) > int(vs_site[i]):
         break
