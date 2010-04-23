@@ -52,9 +52,12 @@ class SearchEntry(gtk.Frame):
   def set_callback(self, text):
     self.__text = text
 
+  def grab_focus_back(self):
+    self.__focus.grab_focus()
+
   def key_press_event(self, widget, event):
     if event.keyval in [gtk.keysyms.KP_Up, gtk.keysyms.Up, gtk.keysyms.KP_Down, gtk.keysyms.Down]:
-      self.__focus.grab_focus()
+      self.grab_focus_back()
       return True
     
     return False
@@ -88,6 +91,7 @@ class SearchEntry(gtk.Frame):
   def hide_entry(self):
     self.hide()
     self.search_entry.set_text('')
+    self.grab_focus_back()
 
   def show_entry(self, event = None):
     self.show()
