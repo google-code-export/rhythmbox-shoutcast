@@ -359,9 +359,17 @@ class ShoutcastSource(rb.StreamingSource):
       self.info_available_id = 0
 
   def info_available_cb(self, backend, uri, field, value):
+    player = self.shell.get_player()
+    entry = player.get_playing_entry()
     if field == 0: # RB_METADATA_FIELD_TITLE:
       self.set_streaming_title(value)
     elif field == 1: # RB_METADATA_FIELD_ARTIST
       self.streaming_artist(value)
+    elif field == 4: # RB_METADATA_FIELD_GENRE
+      pass # RHYTHMDB_PROP_GENRE
+    elif field == 19: # RB_METADATA_FIELD_CODEC
+      self.db.set(entry, rhythmdb.PROP_MIMETYPE, value)
+    elif field == 20: # RB_METADATA_FIELD_BITRATE
+      self.db.set(entry, rhythmdb.PROP_BITRATE, value)
 
 gobject.type_register(ShoutcastSource)
