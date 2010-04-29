@@ -19,11 +19,11 @@
 import rhythmdb, rb
 import traceback, sys
 
-def fe():
-  result = ''
-  
+def ft():
   lines = traceback.format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback)
-  for line in lines:
-    result += line
+  text = '\n'.join(lines)
     
-  return Exception(result)
+  return text
+
+def fe():
+  return Exception(ft())
