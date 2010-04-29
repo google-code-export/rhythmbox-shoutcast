@@ -20,6 +20,7 @@ import rb, rhythmdb
 import gobject, os, gtk, gconf, gnome
 import load, widgets, debug, service
 import xmlstore
+import traceback, sys
 
 menu_ui = """
 <ui>
@@ -408,10 +409,14 @@ class ShoutcastSource(rb.StreamingSource):
     if file_open.run() == gtk.RESPONSE_OK:
       result = file_open.get_filename()
       
-      opml = xmlstore.ShoutcastOPML()
-      opml.read(result)
-      opml.save(self.db, self.entry_type)
-      
+      try:
+        opml = xmlstore.ShoutcastOPML()
+        opml.read(result)
+        opml.save(self.db, self.entry_type)
+      except Exception as e:
+        file_open.destroy()
+        self.show_error(service.ft())
+
     file_open.destroy()
 
   def do_export_shoutcast(self, obj):
@@ -437,11 +442,23 @@ class ShoutcastSource(rb.StreamingSource):
     if file_save.run() == gtk.RESPONSE_OK:
       result = file_save.get_filename()
       
-      opml = xmlstore.ShoutcastOPML()
-      opml.load(self.db, self.entry_type)
-      opml.write(result)
-      
+      try:
+        opml = xmlstore.ShoutcastOPML()
+        opml.load(self.db, self.entry_type)
+        opml.write(result)
+      except Exception as e:
+        file_save.destroy()
+        self.show_error(service.ft())
+
     file_save.destroy()
+
+  def show_error(self, message):
+    parent = self.shell.get_property('window')
+    dialog = gtk.MessageDialog(parent, gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, message)    
+    
+    dialog.run()
+    dialog.destroy()
+    
 
   def playing_source_changed_cb(self, player, source):
     backend = player.get_property('player')
