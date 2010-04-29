@@ -66,8 +66,8 @@ class Shoutcast(rb.Plugin):
     shell.register_entry_type_for_source(self.source, self.entry_type)
     shell.append_source(self.source, None)
     
-    # hack
-    self.source.db_connect_signal(self.db)
+    # hack, should be done within gobject constructor
+    self.source.init()
 
   def deactivate(self, shell):
     self.db = None
