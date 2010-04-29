@@ -3,7 +3,7 @@
 # $Id: OPML.py,v 1.5 2002/10/17 21:14:49 juri Exp $
 
 from xml.sax import saxutils, make_parser, SAXParseException
-from xml.sax.handler import feature_namespaces, feature_namespace_prefixes
+from xml.sax.handler import feature_namespaces, feature_namespace_prefixes, ContentHandler
 from xml.sax.saxutils import XMLGenerator
 from xml.sax.xmlreader import AttributesImpl
 from StringIO import StringIO
@@ -89,7 +89,7 @@ class OutlineList:
     def roots(self):
         return self._roots
 
-class OPMLHandler(saxutils.DefaultHandler):
+class OPMLHandler(ContentHandler):
     def __init__(self):
         self._outlines = OutlineList()
         self._opml = None
