@@ -19,16 +19,31 @@
 import rb, rhythmdb
 import gobject, os, gtk, gconf, gnome
 import load, widgets, debug, service
+import xmlstore
 
 menu_ui = """
 <ui>
+
+  <menubar name="MenuBar">
+    <menu name="MusicMenu" action="Music">
+      <placeholder name="PluginPlaceholder">
+        <menu name="ShoutcastMenu" action="ShoutcastMenu">
+          <menuitem name="ImportShoutcast" action="ImportShoutcast"/>
+          <menuitem name="ExportShoutcast" action="ExportShoutcast"/>
+        </menu>
+      </placeholder>
+    </menu>
+  </menubar>
+
   <popup name="ShoutcastGenresViewPopup">
-    <menuitem name="Reload genres" action="ReloadGenres"/>
-    <menuitem name="Reload stations" action="ReloadStations"/>
+    <menuitem name="ReloadGenres" action="ReloadGenres"/>
+    <menuitem name="ReloadStations" action="ReloadStations"/>
   </popup>
+
   <popup name="ShoutcastSourceViewPopup">
     <menuitem name="CopyURL" action="CopyURL"/>
   </popup>
+
 </ui>
 """
 
@@ -72,12 +87,16 @@ class ShoutcastSource(rb.StreamingSource):
     else:
       raise AttributeError, 'unknown property %s' % property.name
 
-  def create(self):
+  def init(self):
     self.shell = self.get_property('shell')
     self.db = self.shell.props.db
     self.entry_type = self.get_property('entry-type')
     self.gconf = gconf.client_get_default()
 
+    self.create_toolbar()
+    self.db_connect_signal()
+
+  def create(self):
     self.loadmanager = load.LoadManager()
     self.loadmanager.load_callback(self.load_status_changed)
 
@@ -86,8 +105,8 @@ class ShoutcastSource(rb.StreamingSource):
     self.genres_list = widgets.GenresView(self.db, self.entry_type)
     self.stations_list = widgets.EntryView(self.db, self.shell.get_player(), self.plugin)
 
-  def db_connect_signal(self, db):
-    db.connect('load-complete', self.db_load_complete)
+  def db_connect_signal(self):
+    self.db.connect('load-complete', self.db_load_complete)
 
   def db_default_query(self):
     genres_query = self.db.query_new()
@@ -110,7 +129,6 @@ class ShoutcastSource(rb.StreamingSource):
     service.check_and_serve(self.db, self.entry_type)
 
     self.create_window()
-    self.create_toolbar()
 
     self.load_config()
 
@@ -175,14 +193,17 @@ class ShoutcastSource(rb.StreamingSource):
     self.add(self.vbox_main)
 
   def create_toolbar(self):
-    icon_file_name = self.plugin.find_file("widgets/filter.png")
-    iconsource = gtk.IconSource()
-    iconsource.set_filename(icon_file_name)
-    iconset = gtk.IconSet()
-    iconset.add_source(iconsource)
-    
+    filtersource = gtk.IconSource()
+    filtersource.set_filename(self.plugin.find_file("widgets/filter.png"))
+    filtericon = gtk.IconSet()
+    filtericon.add_source(filtersource)    
+    shoutcastsource = gtk.IconSource()
+    shoutcastsource.set_filename(self.plugin.find_file("shoutcast.png"))
+    shoutcasticon = gtk.IconSet()
+    shoutcasticon.add_source(shoutcastsource)    
     iconfactory = gtk.IconFactory()
-    iconfactory.add("filter-icon", iconset)
+    iconfactory.add('filter-icon', filtericon)
+    iconfactory.add('shoutcast-icon', shoutcasticon)
     iconfactory.add_default()
 
     manager = self.shell.get_player().get_property('ui-manager')
@@ -195,17 +216,34 @@ class ShoutcastSource(rb.StreamingSource):
         _("Copy station URL to clipboard"),
         'gtk-copy')
     self.action_group.add_action(action)
-    action = gtk.Action('ReloadGenres', _('Reload genres'),
-        _("Reload genres from shoutcast server"),
+    action = gtk.Action('ReloadGenres', _('Reload genres list'),
+        _("Reload genres list from the shoutcast server"),
         'gtk-refresh')
     self.action_group.add_action(action)
-    action = gtk.Action('ReloadStations', _('Reload stations list'),
-        _("Reload stations list from shoutcast server"),
+    action = gtk.Action('ReloadStations', _('Reload stations'),
+        _("Reload stations list for selected genre from the shoutcast server"),
         'gtk-refresh')
+    self.action_group.add_action(action)
+    action = gtk.Action('ImportShoutcast', _('Import Favorite stations ...'),
+        _("Import Shoutcast favorite stations from OPML file"),
+        'gtk-copy')
+    self.action_group.add_action(action)
+    action = gtk.Action('ExportShoutcast', _('Export Favorite stations ...'),
+        _("Export Shoutcast favorite stations from OPML file"),
+        'gtk-copy')
+    self.action_group.add_action(action)
+    action = gtk.Action('ShoutcastMenu', _('Shoutcast'),
+        _("ShoutcastMenu"),
+        'shoutcast-icon')
     self.action_group.add_action(action)
     manager.insert_action_group(self.action_group, 0)
     self.ui_id = manager.add_ui_from_string(menu_ui)
     manager.ensure_update()
+
+    action = self.action_group.get_action('ImportShoutcast')
+    action.connect('activate', self.do_import_shoutcast)
+    action = self.action_group.get_action('ExportShoutcast')
+    action.connect('activate', self.do_export_shoutcast)
 
   def load_config(self):
     self.filter = bool(self.gconf.get_int('/apps/rhythmbox/plugins/shoutcast/filter'))
@@ -262,7 +300,7 @@ class ShoutcastSource(rb.StreamingSource):
   def filter_genres_default_query(self):
     self.genres_list.do_query(self.filter)
 
-    # do not update genres when filter active (no need, favorite mode mean local stations)
+    # do not update genres until filter is active (cause it is no need, favorite mode works with local stations)
     if not self.filter:
       self.loadmanager.load(load.XmlGenresLoader(self.db, self.cache_dir, self.entry_type))
 
@@ -282,7 +320,7 @@ class ShoutcastSource(rb.StreamingSource):
     self.db.do_full_query_parsed(self.stations_query_model, stations_query)
     self.stations_list.set_model(self.stations_query_model)
 
-    # do not update station when filter active (no need, favorite mode mean local stations)
+    # do not update genres until filter is active (cause it is no need, favorite mode works with local stations)
     if not self.filter:
       self.loadmanager.load(load.XmlStationsLoader(self.db, self.cache_dir, self.entry_type, genre))
 
@@ -348,6 +386,62 @@ class ShoutcastSource(rb.StreamingSource):
 
   def load_status_changed(self):
     self.emit('status-changed')
+
+  def do_import_shoutcast(self, obj):
+    file_open = gtk.FileChooserDialog(title="Select OPML file"
+          , action=gtk.FILE_CHOOSER_ACTION_OPEN
+          , buttons=(gtk.STOCK_CANCEL
+                , gtk.RESPONSE_CANCEL
+                , gtk.STOCK_OPEN
+                , gtk.RESPONSE_OK))
+
+    filter = gtk.FileFilter()
+    filter.set_name("OPML")
+    filter.add_pattern("*.opml")
+    file_open.add_filter(filter)
+
+    filter = gtk.FileFilter()
+    filter.set_name(_("All files"))
+    filter.add_pattern("*")
+    file_open.add_filter(filter)
+    
+    if file_open.run() == gtk.RESPONSE_OK:
+      result = file_open.get_filename()
+      
+      opml = xmlstore.ShoutcastOPML()
+      opml.read(result)
+      opml.save(self.db, self.entry_type)
+      
+    file_open.destroy()
+
+  def do_export_shoutcast(self, obj):
+    file_save = gtk.FileChooserDialog(title="Save OPML file"
+          , action=gtk.FILE_CHOOSER_ACTION_SAVE
+          , buttons=(gtk.STOCK_CANCEL
+                , gtk.RESPONSE_CANCEL
+                , gtk.STOCK_SAVE
+                , gtk.RESPONSE_OK))
+
+    filter = gtk.FileFilter()
+    filter.set_name("OPML")
+    filter.add_pattern("*.opml")
+    file_save.add_filter(filter)
+
+    filter = gtk.FileFilter()
+    filter.set_name(_("All files"))
+    filter.add_pattern("*")
+    file_save.add_filter(filter)
+    
+    file_save.set_current_name('shoutcast-favorites.opml')
+    
+    if file_save.run() == gtk.RESPONSE_OK:
+      result = file_save.get_filename()
+      
+      opml = xmlstore.ShoutcastOPML()
+      opml.load(self.db, self.entry_type)
+      opml.write(result)
+      
+    file_save.destroy()
 
   def playing_source_changed_cb(self, player, source):
     backend = player.get_property('player')
