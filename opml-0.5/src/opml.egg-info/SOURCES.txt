@@ -1,0 +1,12 @@
+README.txt
+buildout.cfg
+setup.py
+bootstrap/bootstrap.py
+src/opml/README
+src/opml/__init__.py
+src/opml/tests.py
+src/opml.egg-info/PKG-INFO
+src/opml.egg-info/SOURCES.txt
+src/opml.egg-info/dependency_links.txt
+src/opml.egg-info/requires.txt
+src/opml.egg-info/top_level.txt
