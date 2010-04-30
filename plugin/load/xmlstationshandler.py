@@ -54,6 +54,8 @@ class XmlStationsHandler(xml.sax.handler.ContentHandler):
       genre = self.genre
       id = int(self.attrs['id'])
       title = self.attrs['name']
+      bitrate = self.attrs['br']
+      mimetype = self.attrs['mt']
       
       track_url = 'http://yp.shoutcast.com/sbin/tunein-station.pls?id=%d&genre=%s' % (id, urllib.quote(genre))
       
@@ -64,5 +66,7 @@ class XmlStationsHandler(xml.sax.handler.ContentHandler):
 
       self.db.set(entry, rhythmdb.PROP_TITLE, title)
       self.db.set(entry, rhythmdb.PROP_GENRE, genre)
+      self.db.set(entry, rhythmdb.PROP_MIMETYPE, mimetype)
+      self.db.set(entry, rhythmdb.PROP_BITRATE, int(bitrate))
       self.db.entry_keyword_remove(entry, 'old')
       self.db.entry_keyword_add(entry, 'station')
