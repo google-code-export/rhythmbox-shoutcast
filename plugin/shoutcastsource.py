@@ -479,8 +479,8 @@ class ShoutcastSource(rb.StreamingSource):
     elif field == 4: # RB_METADATA_FIELD_GENRE
       pass # RHYTHMDB_PROP_GENRE
     elif field == 19: # RB_METADATA_FIELD_CODEC
-      self.db.set(entry, rhythmdb.PROP_MIMETYPE, value)
+      pass # self.db.set(entry, rhythmdb.PROP_MIMETYPE, value)
     elif field == 20: # RB_METADATA_FIELD_BITRATE
-      self.db.set(entry, rhythmdb.PROP_BITRATE, value)
+      pass # self.db.set(entry, rhythmdb.PROP_BITRATE, value)
 
 gobject.type_register(ShoutcastSource)
