@@ -323,7 +323,19 @@ class ShoutcastSource(rb.StreamingSource):
 
     # do not update genres until filter is active (cause it is no need, favorite mode works with local stations)
     if not self.filter:
-      self.loadmanager.load(load.XmlStationsLoader(self.db, self.cache_dir, self.entry_type, genre))
+      loader = load.XmlStationsLoader(self.db, self.cache_dir, self.entry_type, genre)
+
+      query = self.db.query_new()
+      self.db.query_append(query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type))
+      self.db.query_append(query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_GENRE, genre))
+      self.db.query_append(query, (rhythmdb.QUERY_PROP_LIKE, rhythmdb.PROP_KEYWORD, 'station'))
+      query_model = self.db.query_model_new_empty()
+      self.db.do_full_query_parsed(query_model, query)
+      stations_here = query_model.get_iter_first()
+  
+      # do start download if is no stations here or it ready to update
+      if not stations_here or loader.ready_to_update():
+        self.loadmanager.load(loader)
 
   def genres_property_selected(self, view, name):
     genre = self.genres_list.genre()

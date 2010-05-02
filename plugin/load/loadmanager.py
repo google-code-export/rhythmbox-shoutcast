@@ -28,9 +28,10 @@ class LoadManager:
   def __init__(self):
     pass
   
-  def load(self, xmlloader):
+  def load(self, xmlloader):    
     xmlloader.loader_callback(self.loader_changed)
-    self.stack.append(xmlloader)
+    
+    self.append(xmlloader)
     
     self.checkstatus()
     self.__notify_status_changed();
@@ -48,6 +49,16 @@ class LoadManager:
   def loader_changed(self):
     self.checkstatus()
     self.__notify_status_changed();
+
+  def append(self, loader):
+    # move exiting entry to the top
+    for i in self.stack:
+      if i.file_url == loader.file_url:
+        self.stack.remove(i)
+        self.stack.append(loader)
+        return
+    # or just add to the top
+    self.stack.append(loader)
 
   def checkstatus(self):
     if self.xmlloader:
