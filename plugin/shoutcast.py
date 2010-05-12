@@ -76,5 +76,5 @@ class Shoutcast(rb.Plugin):
     self.source = None
     self.shell = None
 
-  def create_configure_dialog(self):
-    pass
+#  def create_configure_dialog(self):
+#    pass
