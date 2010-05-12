@@ -233,7 +233,7 @@ class ShoutcastSource(rb.StreamingSource):
         _("Export Shoutcast favorite stations from OPML file"),
         'gtk-copy')
     self.action_group.add_action(action)
-    action = gtk.Action('ShoutcastMenu', _('Shoutcast'),
+    action = gtk.Action('ShoutcastMenu', _('SHOUTcast'),
         _("ShoutcastMenu"),
         'shoutcast-icon')
     self.action_group.add_action(action)
