@@ -75,7 +75,7 @@ class VersionCheck(load.CheckDownload):
     
     for i in range(3):
       if int(vs_local[i]) < int(vs_site[i]):
-        self.notify(_("Rhythmbox-Shoutcast plugin"),
+        self.notify(_("Rhythmbox-SHOUTcast plugin"),
                     _("New version available: ") + version +
                     '\n\n' + description + _("\n\nPlease visit " + self.home_url));
         break
@@ -85,7 +85,7 @@ class VersionCheck(load.CheckDownload):
   def notify(self, message, version):
     try:
         import pynotify
-        if pynotify.init("Rhythmbox shoutcast plugin"):
+        if pynotify.init("Rhythmbox SHOUTcast plugin"):
             n = pynotify.Notification(message, version)
             n.show()
         else:

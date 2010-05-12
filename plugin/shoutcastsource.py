@@ -78,7 +78,7 @@ class ShoutcastSource(rb.StreamingSource):
   info_available_id = 0
   
   def __init__ (self):
-    rb.StreamingSource.__init__(self, name=_("Shoutcast"))
+    rb.StreamingSource.__init__(self, name=_("SHOUTcast"))
 
   def do_set_property(self, property, value):
     if property.name == 'plugin':
@@ -147,7 +147,7 @@ class ShoutcastSource(rb.StreamingSource):
     
     label_1 = gtk.Label('Loading...')
     self.vbox_main.pack_start(label_1)
-    label_2 = gtk.Label('(If you just added Shoutcast plugin, please restart the rhythmbox player due to bug in rhythmdb)')
+    label_2 = gtk.Label('(If you just added SHOUTcast plugin, please restart the rhythmbox player due to bug in rhythmdb)')
     self.vbox_main.pack_start(label_2)
     
     self.vbox_main.show_all()
