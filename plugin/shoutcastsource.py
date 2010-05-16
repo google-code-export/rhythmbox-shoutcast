@@ -36,6 +36,11 @@ menu_ui = """
     </menu>
   </menubar>
 
+  <popup name="ShoutcastSourceMainPopup">
+    <menuitem name="ImportShoutcast" action="ImportShoutcast"/>
+    <menuitem name="ExportShoutcast" action="ExportShoutcast"/>
+  </popup>
+
   <popup name="ShoutcastGenresViewPopup">
     <menuitem name="ReloadGenres" action="ReloadGenres"/>
     <menuitem name="ReloadStations" action="ReloadStations"/>
@@ -367,6 +372,11 @@ class ShoutcastSource(rb.StreamingSource):
   def do_stations_show_popup(self, entry, source):
     self.show_source_popup("/ShoutcastSourceViewPopup")
     
+    return True
+
+  def do_impl_show_popup(self):
+    self.show_source_popup("/ShoutcastSourceMainPopup")
+
     return True
 
   def do_impl_get_status(self):
