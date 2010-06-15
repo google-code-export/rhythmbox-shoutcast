@@ -23,7 +23,7 @@ import load, debug
 class VersionCheck(load.CheckDownload):
   
   # if you feels paranoid you can diable version check for this plugin.
-  # simple change DISABLE = True
+  # it is simple, just change DISABLE = True
   DISABLE = False
 
   rb_plugin = None  
@@ -68,7 +68,9 @@ class VersionCheck(load.CheckDownload):
     file = open(self.file_local)
     version = file.readline().strip()
     
-    description = '\n'.join(file.readlines()).strip()
+    description = ''.join(file.readlines()).strip()
+    
+    print description
     
     vs_site = version.split('.')
     vs_local = self.version.split('.')
