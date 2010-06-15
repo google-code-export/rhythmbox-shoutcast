@@ -70,8 +70,6 @@ class VersionCheck(load.CheckDownload):
     
     description = ''.join(file.readlines()).strip()
     
-    print description
-    
     vs_site = version.split('.')
     vs_local = self.version.split('.')
     
