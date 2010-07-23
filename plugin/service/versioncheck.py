@@ -64,11 +64,26 @@ class VersionCheck(load.CheckDownload):
     
     self.version_load()
 
+  def version_search(self, file):
+    while file:
+      line = file.readline()
+      if not line:
+        break;
+      if not line.startswith('#') and len(line) > 0 and not line.isspace():
+        return line
+      
+    raise Exception("Unable to find version in a file")
+
   def version_load(self):
     file = open(self.file_local)
-    version = file.readline().strip()
+
+    version = self.version_search(file)
     
     description = ''.join(file.readlines()).strip()
+    
+    description = description.strip('{{{')
+    description = description.strip('}}}')
+    description = description.strip()
     
     vs_site = version.split('.')
     vs_local = self.version.split('.')
@@ -89,6 +104,6 @@ class VersionCheck(load.CheckDownload):
             n = pynotify.Notification(message, version)
             n.show()
         else:
-            raise "Unable to initialize pynotify"
+            raise Exception("Unable to initialize pynotify")
     except e:
         self.error(e)
