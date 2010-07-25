@@ -43,9 +43,24 @@ class EntryView(rb.EntryView):
     
     self.pixs = [gtk.gdk.pixbuf_new_from_file(self.plugin.find_file('widgets/star-off.png')),
                  gtk.gdk.pixbuf_new_from_file(self.plugin.find_file('widgets/star-on.png'))]
-
-  def load_columns(self): 
+    
     self.append_column(rb.ENTRY_VIEW_COL_TITLE, True)
+    
+    self.find_tree()
+
+  def catch_treecontrol(self, widget):
+    if isinstance(widget, gtk.TreeView):
+      self.treeview = widget
+  
+  def find_tree(self):
+    self.foreach(self.catch_treecontrol)
+    
+    if not self.treeview:
+      raise Exception('Unable to find treeview')
+
+  def load_columns_filer(self):
+    while(len(self.treeview.get_columns()) > 2):
+      self.treeview.remove_column(self.treeview.get_column(2))
 
     self.set_columns_clickable(False)
     self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
@@ -53,8 +68,9 @@ class EntryView(rb.EntryView):
     
     self.set_sorting_order("Title", gtk.SORT_ASCENDING)
 
-  def load_columns2(self): 
-    self.append_column(rb.ENTRY_VIEW_COL_TITLE, True)
+  def load_columns(self): 
+    while(len(self.treeview.get_columns()) > 2):
+      self.treeview.remove_column(self.treeview.get_column(2))
 
     cell_render = gtk.CellRendererText()
     column = gtk.TreeViewColumn()
