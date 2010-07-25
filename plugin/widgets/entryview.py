@@ -17,17 +17,23 @@
 """
 
 import rb, rhythmdb
-import gtk, gconf, gnome
+import gtk, gconf, gnome, urlparse, time
 import debug, rbdb
 
 from cellpixbufbutton import *
 from treesmartsearch import *
+from load.xmlstationshandler import *
 
 class EntryView(rb.EntryView):
 
   plugin = None
   pixs = []
   treesmartsearch = None
+
+  __gsignals__ = {
+                  'star': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
+                             (gtk.TreeModel, gtk.TreeIter)),
+  }
 
   def __init__(self, db, player, plugin):
     rb.EntryView.__init__(self,db, player, None, False, False)
@@ -70,15 +76,31 @@ class EntryView(rb.EntryView):
   def star_click(self, cell, model, path, iter):
     entry = rbdb.iter_to_entry(self.db, model, iter)
     
+    url = urlparse.urlparse(self.db.entry_get(entry, rhythmdb.PROP_LOCATION))
+    query = urlparse.parse_qs(url.query)
+    title = self.db.entry_get(entry, rhythmdb.PROP_TITLE) 
+
     star = self.db.entry_keyword_has(entry, 'star')
     if star:
       self.db.entry_keyword_remove(entry, 'star')
+      # do not reset url stype to old, keep new favortie url style, to prevent replacing new stations
+      # with the same id
     else:
       self.db.entry_keyword_add(entry, 'star')
-
+      self.db.set(entry, rhythmdb.PROP_LOCATION, xmlstation_encodeurl_star(int(query['id'][0]), query['genre'][0], title))
+      
+    # after entry is tagged we need to add &star=[Title] to the location
+    # which can help us from 1) deleting entry 2) from rewriting entry with same
+    # station id and new content. current time is nessesery because some one
+    # can mark station with same id as favorite at different time. this is
+    # all about - shoutcast server can remove your favorite station and add
+    # new station with same id and new contenent later.
+    
     self.db.commit()
     
     model.row_changed(path, iter)
+    
+    self.emit('star', model, iter)
 
   def get_entry_url(self):
     entrys = self.get_selected_entries()
@@ -97,10 +119,25 @@ class EntryView(rb.EntryView):
     url = self.get_entry_url()
     self.gconf.set_string('/apps/rhythmbox/plugins/shoutcast/stations_entry', url)
 
+  def entry_lookup(self, url):
+    # in case of deleting favorite station (as old and without star tag buy with star url)
+    #, we need to lookup first:
+    # 1) current station by url
+    # 2) non favorite station without star in url
+    urlp = urlparse.urlparse(url)
+    query = urlparse.parse_qs(urlp.query)
+    urls = xmlstation_encodeurl(int(query['id'][0]), query['genre'][0])
+
+    entry = self.db.entry_lookup_by_location(url)
+    if entry:
+      return entry
+    entry = self.db.entry_lookup_by_location(urls)
+    return entry
+
   def load_config(self):
     url = self.gconf.get_string('/apps/rhythmbox/plugins/shoutcast/stations_entry')
     if url:
-      entry = self.db.entry_lookup_by_location(url)
+      entry = self.entry_lookup(url)
       if entry:
         self.select_entry(entry)
         gobject.idle_add(self.hack_scroll_to_entry, entry)
