@@ -36,13 +36,19 @@ class OPML(dict):
         xg.endElement("opml")
 
 class Outline(dict):
-    __slots__ = ('_children')
+    __slots__ = ('_children', '_playlist')
     
     def __init__(self):
         self._children = []
 
     def add_child(self, outline):
         self._children.append(outline)
+
+    def set_playlist(self, pl):
+      self._playlist = pl
+
+    def get_playlist(self):
+      return self._playlist
 
     def get_children_iter(self):
         return self.OIterator(self)
@@ -51,6 +57,8 @@ class Outline(dict):
 
     def output(self, xg):
         xg.startElement("outline", AttributesImpl(self))
+        if self._playlist:
+          xg.characters(self._playlist)
         for c in self.children:
             c.output(xg)
         xg.endElement("outline")
@@ -82,8 +90,9 @@ class OutlineList:
             self._roots.append(outline)
         self._stack.append(outline)
 
-    def close_outline(self):
+    def close_outline(self, contenet):
         if len(self._stack):
+            self._stack[-1].set_playlist(contenet)
             del self._stack[-1]
 
     def roots(self):
@@ -108,7 +117,7 @@ class OPMLHandler(ContentHandler):
 
     def endElement(self, name):
         if name == 'outline':
-            self._outlines.close_outline()
+            self._outlines.close_outline(self._content)
             return
         if name == 'opml':
             self._opml.outlines = self._outlines.roots()

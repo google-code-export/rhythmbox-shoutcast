@@ -1,6 +1,6 @@
 import rhythmdb, rb
-import rbdb, debug
-import StringIO, urllib
+import rbdb, debug, load
+import StringIO, urllib, base64
 
 from xml.sax import saxutils, make_parser, SAXParseException
 from xml.sax.handler import feature_namespaces, feature_namespace_prefixes, ContentHandler
@@ -26,7 +26,7 @@ class ShoutcastOPML(opml.OPML):
 
     parser.parse(f)
     
-  def save(self, db, entry_type):
+  def save(self, db, data_dir, entry_type):
     """ save data to database """
 
     print self.outlines
@@ -35,8 +35,9 @@ class ShoutcastOPML(opml.OPML):
       genre = outline['category']
       title = outline['text']
       track_url = outline['url']
+      playlist = outline.get_playlist()
 
-      genre_url = 'http://yp.shoutcast.com/sbin/newxml.phtml?genre=%s' % (urllib.quote(genre))
+      genre_url = load.xmlgenres_encodeurl(genre)
 
       entry = rbdb.entry_lookup_by_location(db, genre_url)
       if entry == None:
@@ -46,15 +47,33 @@ class ShoutcastOPML(opml.OPML):
         db.set(entry, rhythmdb.PROP_GENRE, genre)
         db.entry_keyword_add(entry, 'genre')
 
-      entry = rbdb.entry_lookup_by_location(db, track_url)
+      # at first we need to find any local favorite stations.
+      # if it fount, do update all from OPML (title, playlist and other)
+      url = load.playlist_filename_url(data_dir, track_url, title)
+      entry = rbdb.entry_lookup_by_location(db, url)
+      
       if entry == None:
-        entry = db.entry_new(entry_type, track_url)
-        debug.log("New station: " + title)
+        # if we don't.
+        # try to look up same station TITLE+ID
+        entry = rbdb.entry_lookup_by_location(db, track_url)
+        if entry:
+          title_db = db.entry_get(entry, rhythmdb.PROP_TITLE)
+          if title != title_db:
+            # if ID is the same but TITLE is different create the new entry
+            entry = None
+
+        if entry == None:
+          entry = db.entry_new(entry_type, url)
+          debug.log("New station: " + title)
 
       db.set(entry, rhythmdb.PROP_TITLE, title)
       db.set(entry, rhythmdb.PROP_GENRE, genre)
       db.entry_keyword_add(entry, 'station')
       db.entry_keyword_add(entry, 'star')
+      
+      if playlist:
+        file = open(load.playlist_filename(data_dir, track_url, title), 'w')
+        file.write(playlist)
       
     db.commit()
 
@@ -76,7 +95,14 @@ class ShoutcastOPML(opml.OPML):
     outline['type'] = 'link'
     outline['text'] = db.entry_get(entry, rhythmdb.PROP_TITLE)
     outline['category'] = db.entry_get(entry, rhythmdb.PROP_GENRE)
-    outline['url'] = db.entry_get(entry, rhythmdb.PROP_LOCATION)
+    url = db.entry_get(entry, rhythmdb.PROP_LOCATION)
+    if load.playlist_isfilename(url):
+      filename = urllib.urlretrieve(url)[0]
+      file = open(filename)
+      playlist = file.read()
+      outline.set_playlist(playlist)
+      url = load.playlist_filename2url(url)
+    outline['url'] = url
     self.outlines.append(outline)
 
   def xml(self):

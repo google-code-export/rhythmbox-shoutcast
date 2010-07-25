@@ -443,7 +443,7 @@ class ShoutcastSource(rb.StreamingSource):
       try:
         opml = xmlstore.ShoutcastOPML()
         opml.read(result)
-        opml.save(self.db, self.entry_type)
+        opml.save(self.db, self.data_dir, self.entry_type)
       except Exception as e:
         file_open.destroy()
         self.show_error(service.ft())
