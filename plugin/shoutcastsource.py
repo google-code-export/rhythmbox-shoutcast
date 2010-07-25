@@ -303,6 +303,12 @@ class ShoutcastSource(rb.StreamingSource):
     if self.genres_list.genre():
       self.filter_by_genre(self.genres_list.genre())
       self.stations_list.load_config()
+      
+    if self.filter:
+      self.stations_list.load_columns_filer()
+    else:
+      self.stations_list.load_columns()
+
 
   def do_copy_url(self, action):
     clipboard = gtk.clipboard_get()
