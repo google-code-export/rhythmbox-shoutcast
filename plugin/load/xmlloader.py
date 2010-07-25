@@ -52,6 +52,7 @@ class XmlLoader(CheckDownload):
     self.check_callback(self.download_state)
   
   def loader_progress(self):
+    # return true if xmlloader is busy, still downloading / parsing
     if self.error:
       return False
     
@@ -67,17 +68,21 @@ class XmlLoader(CheckDownload):
     self.__callback = callback
 
   def loader_fresh(self):
+    # just added download, fresh, not yet started
     return self.fresh
 
   def loader_update(self):
+    # do start your job, start to download / parse
     self.fresh = False
     self.clean_keywords()
     self.update_catalogue()
 
   def loader_result(self):
+    # after loader_progress, call for result (text or error)
     return self.error
 
   def loader_get_progress(self):
+    # return progress in tuple (text, progress 0.0 - 1.0)
     if self.check_progress():
       return self.check_get_progress()
     else:
@@ -87,9 +92,11 @@ class XmlLoader(CheckDownload):
         return (self.url, -1)
 
   def set_error(self, e):
+    # any error put here, we'll return it with loader_result
     self.error = e
 
   def download_state(self):
+    # after check (super class, downloading progress) is done, it call this function.
     if self.check_progress():
       return
     
@@ -98,14 +105,17 @@ class XmlLoader(CheckDownload):
       self.__notify_status_changed()
       return
     
+    # start to parse new xml
     self.catalogue_load()
     self.__notify_status_changed()
 
   def update_catalogue(self):
+    # do parse
     if not self.check_update():
       self.catalogue_load()
 
   def catalogue_load(self):
+    # do parse job
     parser = xml.sax.make_parser()
     parser.setContentHandler(self.xml_handler)
     
