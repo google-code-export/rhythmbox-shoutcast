@@ -63,7 +63,10 @@ class ShoutcastOPML(opml.OPML):
             entry = None
 
         if entry == None:
-          entry = db.entry_new(entry_type, url)
+          if playlist:
+            entry = db.entry_new(entry_type, url)
+          else:
+            entry = db.entry_new(entry_type, track_url)
           debug.log("New station: " + title)
 
       db.set(entry, rhythmdb.PROP_TITLE, title)
