@@ -33,13 +33,18 @@ class PlaylistLoader(CheckDownload):
   fresh = True
 
   error = None
+  title = None
   
   __callback = None
   __notify_id = 0
 
   def __init__(self, data_dir, url):
-    XmlLoader.__init__(self, os.path.join(data_dir, playlist_filename(url),
-                       url))
+    CheckDownload.__init__(self, os.path.join(data_dir, playlist_filename(url)),
+                       url)
+
+    urlp = urlparse.urlparse(url)
+    query = urlparse.parse_qs(urlp.query)
+    self.title = query['star'][0]
 
     self.url = url
 
@@ -74,9 +79,9 @@ class PlaylistLoader(CheckDownload):
   def loader_get_progress(self):
     # return progress in tuple (text, progress 0.0 - 1.0)
     if self.check_progress():
-      return self.check_get_progress()
+      return ("Downloading %s" % (self.title), self.check_get_progress()[1])
     else:
-      return (self.url, -1)
+      return ("Downloaded playlist", -1)
 
   def set_error(self, e):
     # any error put here, we'll return it with loader_result
