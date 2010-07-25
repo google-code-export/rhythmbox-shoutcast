@@ -44,7 +44,33 @@ class EntryView(rb.EntryView):
     self.pixs = [gtk.gdk.pixbuf_new_from_file(self.plugin.find_file('widgets/star-off.png')),
                  gtk.gdk.pixbuf_new_from_file(self.plugin.find_file('widgets/star-on.png'))]
 
+  def load_columns(self): 
     self.append_column(rb.ENTRY_VIEW_COL_TITLE, True)
+
+    self.set_columns_clickable(False)
+    self.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+    self.set_shadow_type(gtk.SHADOW_IN)
+    
+    self.set_sorting_order("Title", gtk.SORT_ASCENDING)
+
+  def load_columns2(self): 
+    self.append_column(rb.ENTRY_VIEW_COL_TITLE, True)
+
+    cell_render = gtk.CellRendererText()
+    column = gtk.TreeViewColumn()
+    column.pack_start(cell_render)
+    column.set_cell_data_func(cell_render, self.bitrate_func)
+    column.set_sizing (gtk.TREE_VIEW_COLUMN_FIXED)
+    column.set_fixed_width(70)
+    self.append_column_custom(column, "Bitrate", "BITRATE")
+
+    cell_render = gtk.CellRendererText()
+    column = gtk.TreeViewColumn()
+    column.pack_start(cell_render)
+    column.set_cell_data_func(cell_render, self.codec_func)
+    column.set_sizing (gtk.TREE_VIEW_COLUMN_FIXED)
+    column.set_fixed_width(100)
+    self.append_column_custom(column, "Codec", "CODEC")
 
     cell_render = CellPixbufButton()
     cell_render.connect('toggled', self.star_click)
@@ -60,6 +86,16 @@ class EntryView(rb.EntryView):
     self.set_shadow_type(gtk.SHADOW_IN)
     
     self.set_sorting_order("Title", gtk.SORT_ASCENDING)
+
+  def codec_func(self, column, cell, model, iter):
+    entry = rbdb.iter_to_entry(self.db, model, iter)
+    codec = self.db.entry_get(entry, rhythmdb.PROP_MIMETYPE)
+    cell.set_property('text', codec)
+
+  def bitrate_func(self, column, cell, model, iter):
+    entry = rbdb.iter_to_entry(self.db, model, iter)
+    bitrate = self.db.entry_get(entry, rhythmdb.PROP_BITRATE)
+    cell.set_property('text', bitrate)
 
   def star_func(self, column, cell, model, iter):
     entry = rbdb.iter_to_entry(self.db, model, iter)
