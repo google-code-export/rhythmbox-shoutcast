@@ -35,6 +35,7 @@ class Shoutcast(rb.Plugin):
     self.shell = shell
     self.db = self.shell.props.db
 
+    self.data_dir = os.path.join(rb.user_data_dir(), 'shoutcast')
     self.cache_dir = os.path.join(rb.user_cache_dir(), 'shoutcast')
     
     self.versioncheck = service.VersionCheck(self.cache_dir, self.find_file("shoutcast.rb-plugin"))    
