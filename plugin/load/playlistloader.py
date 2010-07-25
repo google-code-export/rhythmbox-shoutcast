@@ -17,11 +17,10 @@
 """
 
 import rhythmdb
-import xml.sax, xml.sax.handler, shutil, os, os.path, urlparse, urllib
+import xml.sax, xml.sax.handler, shutil, os, urlparse, urllib
 import rbdb, debug
 
-from xmlloader import *
-from xmlstationshandler import *
+from checkdownload import *
 
 def playlist_filename(data_dir, url, title):
   # create filename from the url of shoutcast station
@@ -39,14 +38,16 @@ def playlist_filename_url(data_dir, url, title):
   return "file://" + urllib.pathname2url(path)
 
 def playlist_filename2url(file_url):
-  name = path.basename(file_url)
-  
+  urlp = urlparse.urlparse(file_url)
+  name = os.path.basename(urlp.path)
+  name = urllib.url2pathname(name)
   query = urlparse.parse_qs(name)
   
   id = int(query['id'][0])
   genre = urllib.quote(query['genre'][0])
   title = urllib.quote(query['star'][0])
 
+  from xmlstationshandler import xmlstation_encodeurl
   return xmlstation_encodeurl(id, genre)
 
 def playlist_isfilename(file_url):

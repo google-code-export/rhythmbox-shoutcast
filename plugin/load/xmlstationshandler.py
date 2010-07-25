@@ -20,10 +20,7 @@ import rhythmdb
 import xml.sax, xml.sax.handler, datetime, urllib, time, os
 import debug, rbdb
 
-from playlistloader import *
-
 '''
-
 station format example:
 
 <station name="TechnoBase.FM - 24h Techno, Dance, Trance, House and More - 128k MP3" mt="audio/mpeg" id="7429" br="128" genre="Techno  Electronic  Dance" ct="We aRe oNe" lc="6993"/>
@@ -36,7 +33,6 @@ where:
   genre - genre
   ct - currently playing track
   lc - listener count
-
 '''
 
 def xmlstation_encodeurl(id, genre):
@@ -74,6 +70,8 @@ class XmlStationsHandler(xml.sax.handler.ContentHandler):
       mimetype = self.attrs['mt']
       
       track_url = xmlstation_encodeurl(id, genre)
+
+      from playlistloader import playlist_filename_url
       track_url_star = playlist_filename_url(self.data_dir, track_url, title)
 
       entry = rbdb.entry_lookup_by_location(self.db, track_url_star)
