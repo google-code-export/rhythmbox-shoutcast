@@ -18,11 +18,10 @@
 
 import rb, rhythmdb
 import gtk, gconf, gnome, urlparse, time
-import debug, rbdb
+import debug, rbdb, load
 
 from cellpixbufbutton import *
 from treesmartsearch import *
-from load.xmlstationshandler import *
 
 class EntryView(rb.EntryView):
 
@@ -76,25 +75,11 @@ class EntryView(rb.EntryView):
   def star_click(self, cell, model, path, iter):
     entry = rbdb.iter_to_entry(self.db, model, iter)
     
-    url = urlparse.urlparse(self.db.entry_get(entry, rhythmdb.PROP_LOCATION))
-    query = urlparse.parse_qs(url.query)
-    title = self.db.entry_get(entry, rhythmdb.PROP_TITLE) 
-
     star = self.db.entry_keyword_has(entry, 'star')
     if star:
       self.db.entry_keyword_remove(entry, 'star')
-      # do not reset url stype to old, keep new favortie url style, to prevent replacing new stations
-      # with the same id
     else:
       self.db.entry_keyword_add(entry, 'star')
-      self.db.set(entry, rhythmdb.PROP_LOCATION, xmlstation_encodeurl_star(int(query['id'][0]), query['genre'][0], title))
-      
-    # after entry is tagged we need to add &star=[Title] to the location
-    # which can help us from 1) deleting entry 2) from rewriting entry with same
-    # station id and new content. current time is nessesery because some one
-    # can mark station with same id as favorite at different time. this is
-    # all about - shoutcast server can remove your favorite station and add
-    # new station with same id and new contenent later.
     
     self.db.commit()
     
@@ -124,15 +109,14 @@ class EntryView(rb.EntryView):
     #, we need to lookup first:
     # 1) current station by url
     # 2) non favorite station without star in url
-    urlp = urlparse.urlparse(url)
-    query = urlparse.parse_qs(urlp.query)
-    urls = xmlstation_encodeurl(int(query['id'][0]), query['genre'][0])
-
     entry = self.db.entry_lookup_by_location(url)
     if entry:
       return entry
-    entry = self.db.entry_lookup_by_location(urls)
-    return entry
+
+    if load.playlist_isfilename(url):
+      url = load.playlist_filename2url(url)
+
+    return self.db.entry_lookup_by_location(url)
 
   def load_config(self):
     url = self.gconf.get_string('/apps/rhythmbox/plugins/shoutcast/stations_entry')
