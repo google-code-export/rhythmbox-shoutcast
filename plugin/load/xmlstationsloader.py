@@ -22,12 +22,13 @@ import rbdb, debug
 
 from xmlloader import *
 from xmlstationshandler import *
+from xmlgenreshandler import *
 
 class XmlStationsLoader(XmlLoader):
 
   def __init__(self, db, cache_dir, entry_type, genre):
     XmlLoader.__init__(self, os.path.join(cache_dir, 'stations-%s.xml' % (urllib.quote(genre))),
-                       'http://yp.shoutcast.com/sbin/newxml.phtml?genre=%s' % (urllib.quote(genre)))
+                       xmlgenres_encodeurl(genre))
     self.db = db
     self.entry_type = entry_type
     self.genre = genre

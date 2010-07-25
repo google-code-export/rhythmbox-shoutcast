@@ -17,7 +17,7 @@
 """
 
 import rhythmdb
-import xml.sax, xml.sax.handler, datetime, urllib
+import xml.sax, xml.sax.handler, datetime, urllib, time
 import debug, rbdb
 
 '''
@@ -37,6 +37,12 @@ where:
 
 '''
 
+def xmlstation_encodeurl_star(id, genre, star):
+  return 'http://yp.shoutcast.com/sbin/tunein-station.pls?id=%d&genre=%s&star=%s' % (id, urllib.quote(genre), star)
+
+def xmlstation_encodeurl(id, genre):
+  return 'http://yp.shoutcast.com/sbin/tunein-station.pls?id=%d&genre=%s' % (id, urllib.quote(genre))
+
 class XmlStationsHandler(xml.sax.handler.ContentHandler):
 
   def __init__(self, db, entry_type, genre):
@@ -48,6 +54,16 @@ class XmlStationsHandler(xml.sax.handler.ContentHandler):
   def startElement(self, name, attrs):
     self.attrs = attrs
 
+  def station_copy(old_url, new_url):
+    entry_old = entry_lookup_by_location(old_url)
+    entry_new = self.db.entry_new(entry_type, new_url)
+    
+    db.set(entry_new, rhythmdb.PROP_TITLE, title)
+    db.set(entry_new, rhythmdb.PROP_GENRE, genre)
+    db.set(entry_new, rhythmdb.PROP_MIMETYPE, mimetype)
+    db.set(entry_new, rhythmdb.PROP_BITRATE, bitrate)
+    db.entry_keyword_add(entry_new, 'station')
+
   def endElement(self, name):
     if name == 'station':
       
@@ -57,12 +73,15 @@ class XmlStationsHandler(xml.sax.handler.ContentHandler):
       bitrate = int(self.attrs['br'])
       mimetype = self.attrs['mt']
       
-      track_url = 'http://yp.shoutcast.com/sbin/tunein-station.pls?id=%d&genre=%s' % (id, urllib.quote(genre))
-      
-      entry = rbdb.entry_lookup_by_location(self.db, track_url)
+      track_url = xmlstation_encodeurl(id, genre)
+      track_url_star = xmlstation_encodeurl_star(id, genre, title)
+
+      entry = rbdb.entry_lookup_by_location(self.db, track_url_star)
       if entry == None:
-      	entry = self.db.entry_new(self.entry_type, track_url)
-        debug.log("New station: " + title)
+        entry = rbdb.entry_lookup_by_location(self.db, track_url)
+        if entry == None:
+          entry = self.db.entry_new(self.entry_type, track_url)
+          debug.log("New station: " + title)
 
       self.db.set(entry, rhythmdb.PROP_TITLE, title)
       self.db.set(entry, rhythmdb.PROP_GENRE, genre)

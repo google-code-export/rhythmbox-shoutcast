@@ -20,6 +20,9 @@ import rhythmdb
 import xml.sax, xml.sax.handler, urllib
 import debug, rbdb
 
+def xmlgenres_encodeurl(genre):
+  return 'http://yp.shoutcast.com/sbin/newxml.phtml?genre=%s' % (urllib.quote(genre))
+
 class XmlGenresHandler(xml.sax.handler.ContentHandler):
   
   def __init__(self, db, entry_type):
@@ -35,7 +38,7 @@ class XmlGenresHandler(xml.sax.handler.ContentHandler):
       
       genre = self.attrs['name']
       
-      track_url = 'http://yp.shoutcast.com/sbin/newxml.phtml?genre=%s' % (urllib.quote(genre))
+      track_url = xmlgenres_encodeurl(genre)
 
       entry = rbdb.entry_lookup_by_location(self.db, track_url)
       if entry == None:
