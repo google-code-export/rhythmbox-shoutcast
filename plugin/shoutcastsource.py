@@ -18,7 +18,7 @@
 
 import rb, rhythmdb
 import gobject, os, gtk, gconf, gnome
-import load, widgets, debug, service
+import load, widgets, debug, service, rbdb
 import xmlstore
 import traceback, sys
 
@@ -65,12 +65,18 @@ class ShoutcastSource(rb.StreamingSource):
       'plugin cache directory',
       '',
       gobject.PARAM_WRITABLE | gobject.PARAM_CONSTRUCT_ONLY),
+    'data-dir': (gobject.TYPE_STRING,
+      'data directory',
+      'plugin data directory',
+      '',
+      gobject.PARAM_WRITABLE | gobject.PARAM_CONSTRUCT_ONLY),
   }
   
   db = None
   shell = None
   entry_type = None
   cache_dir = None
+  data_dir = None
   plugin = None
   loadmanager = None
   activated = False
@@ -90,6 +96,8 @@ class ShoutcastSource(rb.StreamingSource):
       self.plugin = value
     elif property.name == 'cache-dir':
       self.cache_dir = value
+    elif property.name == 'data-dir':
+      self.data_dir = value
     else:
       raise AttributeError, 'unknown property %s' % property.name
 
@@ -173,6 +181,7 @@ class ShoutcastSource(rb.StreamingSource):
     
     self.genres_list.connect('show_popup', self.do_genres_show_popup)
     self.stations_list.connect('show_popup', self.do_stations_show_popup)
+    self.stations_list.connect('star', self.do_star_change)
     
     player = self.shell.get_property('shell-player')
     player.connect('playing-source-changed', self.playing_source_changed_cb)
@@ -326,7 +335,7 @@ class ShoutcastSource(rb.StreamingSource):
     self.db.do_full_query_parsed(self.stations_query_model, stations_query)
     self.stations_list.set_model(self.stations_query_model)
 
-    # do not update genres until filter is active (cause it is no need, favorite mode works with local stations)
+    # do not update genres until filter mode is active (cause that is no need, favorite mode works with local stations)
     if not self.filter:
       loader = load.XmlStationsLoader(self.db, self.cache_dir, self.entry_type, genre)
 
@@ -473,6 +482,16 @@ class ShoutcastSource(rb.StreamingSource):
         self.show_error(service.ft())
 
     file_save.destroy()
+
+  def do_star_change(self, entryview, model, iter):
+    entry = rbdb.iter_to_entry(self.db, model, iter)
+    star = self.db.entry_keyword_has(entry, 'star')
+    url = self.db.entry_get(entry, rhythmdb.PROP_LOCATION)
+
+    if star:
+      self.loadmanager.load(load.PlaylistLoader(self.data_dir, url))
+    else:
+      os.remove(os.path.join(self.data_dir, load.playlistloader.playlist_filename(url)))
 
   def show_error(self, message):
     parent = self.shell.get_property('window')
