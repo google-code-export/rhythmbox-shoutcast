@@ -17,16 +17,40 @@
 """
 
 import rhythmdb
-import xml.sax, xml.sax.handler, shutil, os, os.path, urlparse
+import xml.sax, xml.sax.handler, shutil, os, os.path, urlparse, urllib
 import rbdb, debug
 
 from xmlloader import *
-from xmlgenreshandler import *
+from xmlstationshandler import *
 
-def playlist_filename(url):
-    urlp = urlparse.urlparse(url)
-    query = urlparse.parse_qs(urlp.query)
-    return "star-%d(%s-%s)" % (int(query['id'][0]), query['genre'][0], query['star'][0])
+def playlist_filename(data_dir, url, title):
+  # create filename from the url of shoutcast station
+  
+  urlp = urlparse.urlparse(url)
+  query = urlparse.parse_qs(urlp.query)
+  
+  id = int(query['id'][0])
+  genre = urllib.quote(query['genre'][0])
+
+  return os.path.join(data_dir, "id=%d&genre=%s&star=%s" % (id, genre, title))
+
+def playlist_filename_url(data_dir, url, title):
+  path = playlist_filename(data_dir, url, title)
+  return "file://" + urllib.pathname2url(path)
+
+def playlist_filename2url(file_url):
+  name = path.basename(file_url)
+  
+  query = urlparse.parse_qs(name)
+  
+  id = int(query['id'][0])
+  genre = urllib.quote(query['genre'][0])
+  title = urllib.quote(query['star'][0])
+
+  return xmlstation_encodeurl(id, genre)
+
+def playlist_isfilename(file_url):
+  return file_url.startswith('file')
 
 class PlaylistLoader(CheckDownload):
 
@@ -34,17 +58,17 @@ class PlaylistLoader(CheckDownload):
 
   error = None
   title = None
+
+  __playlistcallback = None
   
   __callback = None
   __notify_id = 0
 
-  def __init__(self, data_dir, url):
-    CheckDownload.__init__(self, os.path.join(data_dir, playlist_filename(url)),
+  def __init__(self, data_dir, url, title):
+    CheckDownload.__init__(self, playlist_filename(data_dir, url, title),
                        url)
 
-    urlp = urlparse.urlparse(url)
-    query = urlparse.parse_qs(urlp.query)
-    self.title = query['star'][0]
+    self.title = title
 
     self.url = url
 
@@ -62,6 +86,9 @@ class PlaylistLoader(CheckDownload):
 
   def loader_callback(self, callback):
     self.__callback = callback
+    
+  def playlist_callback(self, callback):
+    self.__playlistcallback = callback
 
   def loader_fresh(self):
     # just added download, fresh, not yet started
@@ -97,11 +124,15 @@ class PlaylistLoader(CheckDownload):
       self.__notify_status_changed()
       return
     
+    if self.__playlistcallback:
+      self.__playlistcallback(self)
+      
     self.__notify_status_changed()
 
   def update_catalogue(self):
     # do download
     self.check_update()
+    self.__notify_status_changed()
 
   def __notify_status_changed(self):  
     if self.__notify_id == 0:

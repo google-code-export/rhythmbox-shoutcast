@@ -17,8 +17,10 @@
 """
 
 import rhythmdb
-import xml.sax, xml.sax.handler, datetime, urllib, time
+import xml.sax, xml.sax.handler, datetime, urllib, time, os
 import debug, rbdb
+
+from playlistloader import *
 
 '''
 
@@ -37,19 +39,17 @@ where:
 
 '''
 
-def xmlstation_encodeurl_star(id, genre, star):
-  return 'http://yp.shoutcast.com/sbin/tunein-station.pls?id=%d&genre=%s&star=%s' % (id, urllib.quote(genre), star)
-
 def xmlstation_encodeurl(id, genre):
   return 'http://yp.shoutcast.com/sbin/tunein-station.pls?id=%d&genre=%s' % (id, urllib.quote(genre))
 
 class XmlStationsHandler(xml.sax.handler.ContentHandler):
 
-  def __init__(self, db, entry_type, genre):
+  def __init__(self, db, entry_type, genre, data_dir):
     xml.sax.handler.ContentHandler.__init__(self)
     self.db = db
     self.entry_type = entry_type
     self.genre = genre
+    self.data_dir = data_dir
 
   def startElement(self, name, attrs):
     self.attrs = attrs
@@ -74,7 +74,7 @@ class XmlStationsHandler(xml.sax.handler.ContentHandler):
       mimetype = self.attrs['mt']
       
       track_url = xmlstation_encodeurl(id, genre)
-      track_url_star = xmlstation_encodeurl_star(id, genre, title)
+      track_url_star = playlist_filename_url(self.data_dir, track_url, title)
 
       entry = rbdb.entry_lookup_by_location(self.db, track_url_star)
       if entry == None:
