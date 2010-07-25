@@ -337,7 +337,7 @@ class ShoutcastSource(rb.StreamingSource):
 
     # do not update genres until filter mode is active (cause that is no need, favorite mode works with local stations)
     if not self.filter:
-      loader = load.XmlStationsLoader(self.db, self.cache_dir, self.entry_type, genre)
+      loader = load.XmlStationsLoader(self.db, self.cache_dir, self.data_dir, self.entry_type, genre)
 
       query = self.db.query_new()
       self.db.query_append(query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type))
@@ -364,7 +364,7 @@ class ShoutcastSource(rb.StreamingSource):
   def do_reload_stations(self, some):
     genre = self.genres_list.genre()
     if genre:
-      loader = load.XmlStationsLoader(self.db, self.cache_dir, self.entry_type, genre)
+      loader = load.XmlStationsLoader(self.db, self.cache_dir, self.data_dir, self.entry_type, genre)
       loader.check_remove_target()
       self.loadmanager.load(loader)
   
@@ -486,12 +486,23 @@ class ShoutcastSource(rb.StreamingSource):
   def do_star_change(self, entryview, model, iter):
     entry = rbdb.iter_to_entry(self.db, model, iter)
     star = self.db.entry_keyword_has(entry, 'star')
-    url = self.db.entry_get(entry, rhythmdb.PROP_LOCATION)
-
+    title = self.db.entry_get(entry, rhythmdb.PROP_TITLE)
+    
     if star:
-      self.loadmanager.load(load.PlaylistLoader(self.data_dir, url))
-    else:
-      os.remove(os.path.join(self.data_dir, load.playlistloader.playlist_filename(url)))
+      url = self.db.entry_get(entry, rhythmdb.PROP_LOCATION)
+      if load.playlist_isfilename(url):
+        playlist = load.PlaylistLoader(self.data_dir, load.playlist_filename2url(url), title)
+      else:
+        playlist = load.PlaylistLoader(self.data_dir, url, title)
+        playlist.playlist_callback(self.do_star_update_url)
+
+      self.loadmanager.load(playlist)
+
+  def do_star_update_url(self, loader):
+    entry = self.db.entry_lookup_by_location(loader.url)
+    title = self.db.entry_get(entry, rhythmdb.PROP_TITLE)
+    self.db.set(entry, rhythmdb.PROP_LOCATION, load.playlist_filename_url(self.data_dir, loader.url, title))
+    self.db.commit()
 
   def show_error(self, message):
     parent = self.shell.get_property('window')
@@ -499,7 +510,6 @@ class ShoutcastSource(rb.StreamingSource):
     
     dialog.run()
     dialog.destroy()
-    
 
   def playing_source_changed_cb(self, player, source):
     backend = player.get_property('player')
