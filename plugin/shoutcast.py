@@ -62,7 +62,8 @@ class Shoutcast(rb.Plugin):
                               icon = icon,
                               entry_type = self.entry_type,
                               source_group = group,
-                              cache_dir = self.cache_dir)
+                              cache_dir = self.cache_dir,
+                              data_dir = self.data_dir)
 
     shell.register_entry_type_for_source(self.source, self.entry_type)
     shell.append_source(self.source, None)
