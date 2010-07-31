@@ -75,7 +75,7 @@ class XmlStationsHandler(xml.sax.handler.ContentHandler):
       track_url_star = playlist_filename_url(self.data_dir, track_url, title)
 
       entry = rbdb.entry_lookup_by_location(self.db, track_url_star)
-      if entry == None:
+      if entry == None or not self.db.entry_keyword_has(entry, 'star'):
         entry = rbdb.entry_lookup_by_location(self.db, track_url)
         if entry == None:
           entry = self.db.entry_new(self.entry_type, track_url)
