@@ -22,6 +22,10 @@ import service, rbdb
 
 from shoutcastsource import *
 
+class ShoutcastEntryType(rhythmdb.EntryType):
+        def __init__(self):
+                rhythmdb.EntryType.__init__(self, name='ShoutcastEntryType')
+
 class Shoutcast(rb.Plugin):
 
   cache_dir = None
@@ -47,7 +51,8 @@ class Shoutcast(rb.Plugin):
                                            _("Library"),
                                            rb.SOURCE_GROUP_CATEGORY_FIXED)
 
-    self.entry_type = self.db.entry_register_type("ShoutcastEntryType")
+    self.entry_type = ShoutcastEntryType()
+    self.db.register_entry_type(self.entry_type)
     self.entry_type.can_sync_metadata = True
     self.entry_type.sync_metadata = None
     self.entry_type.save_to_disk = True
