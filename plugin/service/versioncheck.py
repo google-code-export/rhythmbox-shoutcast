@@ -31,7 +31,7 @@ class VersionCheck(load.CheckDownload):
   
   def __init__(self, cache_dir, rb_plugin):
     load.CheckDownload.__init__(self, os.path.join(cache_dir, 'versioncheck'),
-                                'http://wiki.rhythmbox-shoutcast.googlecode.com/hg/LastVersion.wiki')
+                                'http://wiki.rhythmbox-shoutcast.googlecode.com/hg/LastVersion170.wiki')
 
     self.check_interval = 24 * 60 * 60
 
