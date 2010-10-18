@@ -23,8 +23,11 @@ import service, rbdb
 from shoutcastsource import *
 
 class ShoutcastEntryType(rhythmdb.EntryType):
-        def __init__(self):
-                rhythmdb.EntryType.__init__(self, name='ShoutcastEntryType')
+  def __init__(self):
+    rhythmdb.EntryType.__init__(self, name = 'ShoutcastEntryType', save_to_disk = True)
+    self.can_sync_metadata = True
+    self.sync_metadata = None
+    self.category = rhythmdb.ENTRY_STREAM
 
 class Shoutcast(rb.Plugin):
 
@@ -53,10 +56,6 @@ class Shoutcast(rb.Plugin):
 
     self.entry_type = ShoutcastEntryType()
     self.db.register_entry_type(self.entry_type)
-    self.entry_type.can_sync_metadata = True
-    self.entry_type.sync_metadata = None
-    self.entry_type.save_to_disk = True
-    self.entry_type.category = rhythmdb.ENTRY_STREAM
 
     width, height = gtk.icon_size_lookup(gtk.ICON_SIZE_LARGE_TOOLBAR)
     icon = gtk.gdk.pixbuf_new_from_file_at_size(self.find_file("shoutcast.png"), width, height)
