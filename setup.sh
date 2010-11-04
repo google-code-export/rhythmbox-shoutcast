@@ -27,7 +27,7 @@ install() {
 	mkdir -p ${DEST}
 
 	# install currect verion of plugin
-	cp -rv ${SOURCE}/plugin/* ${DEST}
+	cp -rv ${SOURCE}/src/* ${DEST}
 }
 
 uninstall() {
