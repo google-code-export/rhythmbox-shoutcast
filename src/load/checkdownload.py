@@ -91,7 +91,10 @@ class CheckDownload:
       return (self.file_url, -1)
 
   def check_remove_target(self):
-    os.remove(self.file_local)
+    try:
+      os.remove(self.file_local)
+    except OSError:
+      pass
 
   def set_error(self, e):
     self.__error = e
