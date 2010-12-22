@@ -87,6 +87,7 @@ class ShoutcastSource(rb.StreamingSource):
   stations_list = None
   load_complete = False
   info_available_id = 0
+  apikey = False
   
   def __init__ (self):
     rb.StreamingSource.__init__(self, name=_("SHOUTcast"))
@@ -263,6 +264,7 @@ class ShoutcastSource(rb.StreamingSource):
   def load_config(self):
     self.filter = bool(self.gconf.get_int('/apps/rhythmbox/plugins/shoutcast/filter'))
     self.vbox_main.set_position(self.gconf.get_int('/apps/rhythmbox/plugins/shoutcast/genres_height'))
+    self.apikey = self.gconf.get_string('/apps/rhythmbox/plugins/shoutcast/apikey')
     
     self.load_positions()
 
@@ -323,7 +325,7 @@ class ShoutcastSource(rb.StreamingSource):
 
     # do not update genres until filter is active (cause it is no need, favorite mode works with local stations)
     if not self.filter:
-      self.loadmanager.load(load.XmlGenresLoader(self.db, self.cache_dir, self.entry_type))
+      self.loadmanager.load(load.XmlGenresLoader(self.db, self.cache_dir, self.entry_type, self.apikey))
 
   def filter_by_genre_clear(self):
     self.stations_query = self.db.query_new()
@@ -343,7 +345,7 @@ class ShoutcastSource(rb.StreamingSource):
 
     # do not update genres until filter mode is active (cause that is no need, favorite mode works with local stations)
     if not self.filter:
-      loader = load.XmlStationsLoader(self.db, self.cache_dir, self.data_dir, self.entry_type, genre)
+      loader = load.XmlStationsLoader(self.db, self.cache_dir, self.data_dir, self.entry_type, genre, self.apikey)
 
       query = self.db.query_new()
       self.db.query_append(query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type))

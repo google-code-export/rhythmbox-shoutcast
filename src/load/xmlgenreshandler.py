@@ -20,8 +20,8 @@ import rhythmdb
 import xml.sax, xml.sax.handler, urllib
 import debug, rbdb
 
-def xmlgenres_encodeurl(genre):
-  return 'http://yp.shoutcast.com/sbin/newxml.phtml?genre=%s' % (urllib.quote(genre))
+def xmlgenres_encodeurl(genre, apikey):
+  return 'http://api.shoutcast.com/legacy/genresearch?genre=%s&k=%s' % (urllib.quote(genre), apikey)
 
 class XmlGenresHandler(xml.sax.handler.ContentHandler):
   

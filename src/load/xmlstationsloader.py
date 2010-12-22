@@ -26,9 +26,9 @@ from xmlgenreshandler import *
 
 class XmlStationsLoader(XmlLoader):
 
-  def __init__(self, db, cache_dir, data_dir, entry_type, genre):
+  def __init__(self, db, cache_dir, data_dir, entry_type, genre, apikey):
     XmlLoader.__init__(self, os.path.join(cache_dir, 'stations-%s.xml' % (urllib.quote(genre))),
-                       xmlgenres_encodeurl(genre))
+                       xmlgenres_encodeurl(genre, apikey))
     self.db = db
     self.entry_type = entry_type
     self.genre = genre

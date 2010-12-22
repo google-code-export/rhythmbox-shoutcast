@@ -25,9 +25,9 @@ from xmlgenreshandler import *
 
 class XmlGenresLoader(XmlLoader):
 
-  def __init__(self, db, cache_dir, entry_type):
+  def __init__(self, db, cache_dir, entry_type, apikey):
     XmlLoader.__init__(self, os.path.join(cache_dir, 'genres.xml'),
-                       'http://yp.shoutcast.com/sbin/newxml.phtml')
+                       'http://api.shoutcast.com/legacy/genrelist?k=%s' % (apikey))
 
     self.db = db
     self.entry_type = entry_type
