@@ -25,10 +25,11 @@ def xmlgenres_encodeurl(genre, apikey):
 
 class XmlGenresHandler(xml.sax.handler.ContentHandler):
   
-  def __init__(self, db, entry_type):
-  	xml.sax.handler.ContentHandler.__init__(self)
-  	self.db = db
-  	self.entry_type = entry_type
+  def __init__(self, db, entry_type, apikey):
+    xml.sax.handler.ContentHandler.__init__(self)
+    self.db = db
+    self.entry_type = entry_type
+    self.apikey = apikey
   
   def startElement(self, name, attrs):
   	self.attrs = attrs
@@ -38,7 +39,7 @@ class XmlGenresHandler(xml.sax.handler.ContentHandler):
       
       genre = self.attrs['name']
       
-      track_url = xmlgenres_encodeurl(genre)
+      track_url = xmlgenres_encodeurl(genre, self.apikey)
 
       entry = rbdb.entry_lookup_by_location(self.db, track_url)
       if entry == None:

@@ -19,3 +19,4 @@
 from error import *
 from service import *
 from versioncheck import *
+from apikeycheck import *

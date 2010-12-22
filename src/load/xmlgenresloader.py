@@ -32,7 +32,7 @@ class XmlGenresLoader(XmlLoader):
     self.db = db
     self.entry_type = entry_type
     
-    self.xml_handler = XmlGenresHandler(self.db, self.entry_type)
+    self.xml_handler = XmlGenresHandler(self.db, self.entry_type, apikey)
 
   def loader_get_progress(self):
     if self.check_progress():

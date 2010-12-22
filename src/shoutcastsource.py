@@ -20,7 +20,7 @@ import rb, rhythmdb
 import gobject, os, gtk, gconf, gnome
 import load, widgets, debug, service, rbdb
 import xmlstore
-import traceback, sys
+import traceback, sys, urllib
 
 menu_ui = """
 <ui>
@@ -79,15 +79,24 @@ class ShoutcastSource(rb.StreamingSource):
   data_dir = None
   plugin = None
   loadmanager = None
+  
+  # form was activated (user clicked on rhythmbox left pane with this plugin name)
   activated = False
+  
+  # main window was created, and we need save window settings on exit
   main_window = False
+  
   filter = False
   vbox_main = None
   genres_list = None
   stations_list = None
+  
+  # database fully loaded. after rhythmbox starts to load database in parallel thread. we need
+  # to wait until it fully loaded. 
   load_complete = False
+  
   info_available_id = 0
-  apikey = False
+  apikey = None
   
   def __init__ (self):
     rb.StreamingSource.__init__(self, name=_("SHOUTcast"))
@@ -109,7 +118,8 @@ class ShoutcastSource(rb.StreamingSource):
     self.gconf = gconf.client_get_default()
 
     self.create_toolbar()
-    self.db_connect_signal()
+    
+    self.db.connect('load-complete', self.db_load_complete)
 
   def create(self):
     self.loadmanager = load.LoadManager()
@@ -120,9 +130,6 @@ class ShoutcastSource(rb.StreamingSource):
     self.genres_list = widgets.GenresView(self.db, self.entry_type)
     self.stations_list = widgets.EntryView(self.db, self.shell.get_player(), self.plugin)
 
-  def db_connect_signal(self):
-    self.db.connect('load-complete', self.db_load_complete)
-
   def db_default_query(self):
     genres_query = self.db.query_new()
     self.db.query_append(genres_query, (rhythmdb.QUERY_PROP_EQUALS, rhythmdb.PROP_TYPE, self.entry_type))
@@ -132,12 +139,17 @@ class ShoutcastSource(rb.StreamingSource):
     
   def db_load_complete(self, db):
     self.load_complete = True
+
+    self.create_form()
     
-    if self.activated:
+  def create_form(self):
+    if self.apikey is None or len(self.apikey) == 0:
+      self.create_aol_form()
+    elif self.activated and self.load_complete:
       self.create_mainwindow()
     else:
       self.create_splashscreen()
-    
+
   def create_mainwindow(self):
     self.main_window = True
     
@@ -165,7 +177,24 @@ class ShoutcastSource(rb.StreamingSource):
     self.vbox_main.pack_start(label_2)
     
     self.vbox_main.show_all()
+    self.add(self.vbox_main)
+
+  def create_aol_form(self):
+    if self.vbox_main:
+      self.remove(self.vbox_main)
+      self.vbox_main.hide_all()
+      self.vbox_main = None
+
+    self.vbox_main = gtk.VBox()
     
+    label_1 = gtk.Label( 'Welcome to AOL (SHOUTcast API 2.0) singn up wizzard :) ...' )
+    self.vbox_main.pack_start(label_1)
+    label_2 = gtk.Label()
+    label_2.set_line_wrap(True)
+    label_2.set_markup( 'goto http://code.google.com/p/rhythmbox-shoutcast/ for details')
+    self.vbox_main.pack_start(label_2)
+    
+    self.vbox_main.show_all()
     self.add(self.vbox_main)
 
   def connect_all(self):
@@ -264,7 +293,6 @@ class ShoutcastSource(rb.StreamingSource):
   def load_config(self):
     self.filter = bool(self.gconf.get_int('/apps/rhythmbox/plugins/shoutcast/filter'))
     self.vbox_main.set_position(self.gconf.get_int('/apps/rhythmbox/plugins/shoutcast/genres_height'))
-    self.apikey = self.gconf.get_string('/apps/rhythmbox/plugins/shoutcast/apikey')
     
     self.load_positions()
 
@@ -377,7 +405,7 @@ class ShoutcastSource(rb.StreamingSource):
       self.loadmanager.load(loader)
   
   def do_reload_genres(self, some):
-    loader = load.XmlGenresLoader(self.db, self.cache_dir, self.entry_type)
+    loader = load.XmlGenresLoader(self.db, self.cache_dir, self.entry_type, self.apikey)
     loader.check_remove_target()
     self.loadmanager.load(loader)
 
@@ -410,10 +438,7 @@ class ShoutcastSource(rb.StreamingSource):
       
       self.create()
       
-      if self.load_complete:
-        self.create_mainwindow()
-      else:
-        self.create_splashscreen()
+      self.create_form()
 
     rb.Source.do_impl_activate(self)
 
@@ -542,4 +567,13 @@ class ShoutcastSource(rb.StreamingSource):
     elif field == 20: # RB_METADATA_FIELD_BITRATE
       pass # self.db.set(entry, rhythmdb.PROP_BITRATE, value)
 
+  def set_apikey(self, apikey):
+    self.apikey = apikey
+    
+    # create form only if it already been loaded and activated. othervise we downloaded version check file earlier before any
+    # action was taked by rhythmbox.
+    
+    if self.activated and self.load_complete:
+      self.create_form()
+      
 gobject.type_register(ShoutcastSource)
