@@ -49,3 +49,22 @@ def iter_to_entry(db, model, iter):
     raise Exception('iter_to_entry: bad entry ' + repr(eid) + ' ' + repr(id))
 
   return entry
+
+def register_entry_type(db, name):
+
+  if hasattr(db, 'entry_register_type'):
+    entry_type = db.entry_register_type(name)
+
+    return entry_type  
+  else:
+    class ShoutcastEntryType(rhythmdb.EntryType):
+      def __init__(self):
+        rhythmdb.EntryType.__init__(self, name = name, save_to_disk = True)
+        self.can_sync_metadata = True
+        self.sync_metadata = None
+        self.category = rhythmdb.ENTRY_STREAM
+  
+    entry_type = ShoutcastEntryType()
+    db.register_entry_type(entry_type)
+  
+    return entry_type
