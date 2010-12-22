@@ -54,7 +54,12 @@ def register_entry_type(db, name):
 
   if hasattr(db, 'entry_register_type'):
     entry_type = db.entry_register_type(name)
-
+    
+    entry_type.can_sync_metadata = True
+    entry_type.sync_metadata = None
+    entry_type.save_to_disk = True
+    entry_type.category = rhythmdb.ENTRY_STREAM
+    
     return entry_type  
   else:
     class ShoutcastEntryType(rhythmdb.EntryType):
