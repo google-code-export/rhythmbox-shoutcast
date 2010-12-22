@@ -28,6 +28,8 @@ install() {
 
 	# install currect verion of plugin
 	cp -rv ${SOURCE}/src/* ${DEST}
+
+	gconftool-2 -t boolean --set /apps/rhythmbox/plugins/shoutcast/active "True"
 }
 
 uninstall() {
@@ -43,7 +45,7 @@ cleanc() {
 	rm -vf ~/.cache/rhythmbox/shoutcast/*
 }
 
-# clean rhythmbox database (rhythmdb)
+# clean rhythmbox database (rhythmdb)		
 cleandb() {
 	rm -vf ~/.local/share/rhythmbox/rhythmdb.xml 
 }
@@ -78,7 +80,7 @@ case "$1" in
 		install
 		;;
 	*)
-		install
+		$0 install
 		;;
 esac
 
