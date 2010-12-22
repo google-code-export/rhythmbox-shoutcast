@@ -91,6 +91,9 @@ class ShoutcastSource(rb.StreamingSource):
   genres_list = None
   stations_list = None
   
+  # if checked we cache SHOUTcast playlists localy in rhythmbox database
+  cache_stations_locally = False
+  
   # database fully loaded. after rhythmbox starts to load database in parallel thread. we need
   # to wait until it fully loaded. 
   load_complete = False
@@ -521,7 +524,7 @@ class ShoutcastSource(rb.StreamingSource):
     star = self.db.entry_keyword_has(entry, 'star')
     title = self.db.entry_get(entry, rhythmdb.PROP_TITLE)
     
-    if star:
+    if star and self.cache_stations_locally:
       url = self.db.entry_get(entry, rhythmdb.PROP_LOCATION)
       if load.playlist_isfilename(url):
         playlist = load.PlaylistLoader(self.data_dir, load.playlist_filename2url(url), title)
