@@ -203,7 +203,7 @@ class ShoutcastSource(rb.StreamingSource):
     self.vbox_main.pack_start(label_1)
     label_2 = gtk.Label()
     label_2.set_line_wrap(True)
-    label_2.set_markup( 'goto http://code.google.com/p/rhythmbox-shoutcast/ for details')
+    label_2.set_markup( 'Getting SHOUTcast API 2.0 magic key from the network ...')
     self.vbox_main.pack_start(label_2)
     
     self.vbox_main.show_all()
