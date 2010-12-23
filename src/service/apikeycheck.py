@@ -32,9 +32,6 @@ class ApikeyCheck(load.CheckDownload):
     self.check_interval = 24 * 60 * 60
 
     self.rb_plugin = rb_plugin
-    
-    config = ConfigParser.ConfigParser()
-    config.read(self.rb_plugin)
         
     self.check_callback(self.check_status)
 
