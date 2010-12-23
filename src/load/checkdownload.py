@@ -99,6 +99,7 @@ class CheckDownload:
   def set_error(self, e):
     self.__error = e
 
+  # return true if local file is outdate (self.check_interval variable), or absent
   def ready_to_update(self):
     try:
       (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(self.file_local)
