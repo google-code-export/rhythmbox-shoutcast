@@ -72,8 +72,13 @@ class ShoutcastSource(rb.StreamingSource):
       gobject.PARAM_WRITABLE | gobject.PARAM_CONSTRUCT_ONLY),
   }
   
+  # rhythmbox rhythmdb object
   db = None
+
+  # rhythmbox shell object
   shell = None
+
+  # rhythmbox rhythmdb entry_type object
   entry_type = None
   cache_dir = None
   data_dir = None
@@ -99,6 +104,8 @@ class ShoutcastSource(rb.StreamingSource):
   load_complete = False
   
   info_available_id = 0
+  
+  # apikey. SHOUTcast API 2.0 developer key.
   apikey = None
   
   def __init__ (self):
@@ -143,7 +150,9 @@ class ShoutcastSource(rb.StreamingSource):
   def db_load_complete(self, db):
     self.load_complete = True
 
-    self.create_form()
+    # create form only if it was activated already
+    if self.activated:
+      self.create_form()
     
   def create_form(self):
     if self.apikey is None or len(self.apikey) == 0:
