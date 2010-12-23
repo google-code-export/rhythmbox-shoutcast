@@ -54,7 +54,7 @@ class CheckDownload:
     self.file_local_temp = file_local + '.tmp'
     self.file_url = file_url
   
-  # run update for local file
+  # run update for local file, return Ture if file need to be downloaded
   def check_update(self):
     if self.ready_to_update():
       self.__file_check = rb.UpdateCheck()
