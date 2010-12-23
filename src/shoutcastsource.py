@@ -582,10 +582,10 @@ class ShoutcastSource(rb.StreamingSource):
   def set_apikey(self, apikey):
     self.apikey = apikey
     
-    # create form only if it already been loaded and activated. othervise we downloaded version check file earlier before any
+    # create form only if it already been activated. othervise we done download apikey file earlier before any
     # action was taked by rhythmbox.
     
-    if self.activated and self.load_complete:
+    if self.activated:
       self.create_form()
       
 gobject.type_register(ShoutcastSource)
