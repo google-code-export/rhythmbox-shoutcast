@@ -403,7 +403,7 @@ class ShoutcastSource(rb.StreamingSource):
   def do_reload_stations(self, some):
     genre = self.genres_list.genre()
     if genre:
-      loader = load.XmlStationsLoader(self.db, self.cache_dir, self.data_dir, self.entry_type, genre)
+      loader = load.XmlStationsLoader(self.db, self.cache_dir, self.data_dir, self.entry_type, genre, self.apikey)
       loader.check_remove_target()
       self.loadmanager.load(loader)
   
