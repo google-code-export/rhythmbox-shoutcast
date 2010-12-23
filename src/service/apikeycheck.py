@@ -25,14 +25,14 @@ class ApikeyCheck(load.CheckDownload):
   # if you have you own key, or you made a fork please provide your own key, or disable check
   DISABLE = False
   
-  def __init__(self, cache_dir, rb_plugin):
+  apikey = None
+  
+  def __init__(self, cache_dir):
     load.CheckDownload.__init__(self, os.path.join(cache_dir, 'apikey'),
                                 'http://wiki.rhythmbox-shoutcast.googlecode.com/hg/SHOUTCastKey.wiki')
 
     self.check_interval = 24 * 60 * 60
 
-    self.rb_plugin = rb_plugin
-        
     self.check_callback(self.check_status)
 
   def check(self):
@@ -50,7 +50,7 @@ class ApikeyCheck(load.CheckDownload):
       return
     
     if self.check_result():
-      debug.log(self.check_result())
+      self.load_failed()
       return
     
     self.apikey_load()
@@ -68,6 +68,20 @@ class ApikeyCheck(load.CheckDownload):
   def apikey_load(self):
     file = open(self.file_local)
 
-    apikey = self.apikey_search(file)
+    self.apikey = self.apikey_search(file)
     
-    self.rb_plugin.set_apikey(apikey)
+    self.load_succesed()
+    
+  def apikey_file_exist(self):
+    try:
+      (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(self.file_local)
+      return True
+    except OSError:
+      return False
+
+  # use self.check_result() to get an error text
+  def load_failed(self):
+    pass
+  
+  def load_succesed(self):
+    pass

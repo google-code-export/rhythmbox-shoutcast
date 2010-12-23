@@ -18,7 +18,7 @@
 
 import rb, rhythmdb
 import gobject, os, gtk, gconf, gnome
-import load, widgets, debug, service, rbdb
+import load, widgets, debug, service, rbdb, service
 import xmlstore
 import traceback, sys, urllib
 
@@ -107,6 +107,7 @@ class ShoutcastSource(rb.StreamingSource):
   
   # apikey. SHOUTcast API 2.0 developer key.
   apikey = None
+  apicheck = None
   
   def __init__ (self):
     rb.StreamingSource.__init__(self, name=_("SHOUTcast"))
@@ -130,6 +131,11 @@ class ShoutcastSource(rb.StreamingSource):
     self.create_toolbar()
     
     self.db.connect('load-complete', self.db_load_complete)
+    
+    self.apicheck = service.ApikeyCheck(self.cache_dir)    
+    self.apicheck.load_failed = self.api_load_failed
+    self.apicheck.load_succesed = self.api_load_success
+    self.apicheck.check()
 
   def create(self):
     self.loadmanager = load.LoadManager()
@@ -155,6 +161,11 @@ class ShoutcastSource(rb.StreamingSource):
       self.create_form()
     
   def create_form(self):
+
+    # do not recreate main window if its alreay created, app can die due (raise exception) to mess with events
+    if self.main_window:
+      return
+    
     if self.apikey is None or len(self.apikey) == 0:
       self.create_aol_form()
     elif self.activated and self.load_complete:
@@ -201,10 +212,18 @@ class ShoutcastSource(rb.StreamingSource):
     
     label_1 = gtk.Label( 'Welcome to AOL (SHOUTcast API 2.0) singn up wizzard :) ...' )
     self.vbox_main.pack_start(label_1)
-    label_2 = gtk.Label()
-    label_2.set_line_wrap(True)
-    label_2.set_markup( 'Getting SHOUTcast API 2.0 magic key from the network ...')
-    self.vbox_main.pack_start(label_2)
+    if self.apicheck.check_result():
+      label_2 = gtk.Label(str(self.apicheck.check_result()))
+      label_2.set_line_wrap(True)
+      self.vbox_main.pack_start(label_2)
+      button = gtk.Button('Reload APIKEY')
+      button.connect('clicked', self.api_reload, button)
+      self.vbox_main.pack_start(button)
+    else:
+      label_2 = gtk.Label()
+      label_2.set_line_wrap(True)
+      label_2.set_markup( 'Getting SHOUTcast API 2.0 magic key from the network ...')
+      self.vbox_main.pack_start(label_2)
     
     self.vbox_main.show_all()
     self.add(self.vbox_main)
@@ -578,14 +597,27 @@ class ShoutcastSource(rb.StreamingSource):
       pass # self.db.set(entry, rhythmdb.PROP_MIMETYPE, value)
     elif field == 20: # RB_METADATA_FIELD_BITRATE
       pass # self.db.set(entry, rhythmdb.PROP_BITRATE, value)
-
-  def set_apikey(self, apikey):
-    self.apikey = apikey
+      
+  def api_reload(self, event, button):
+    button.set_state(gtk.STATE_INSENSITIVE)
+    self.apicheck.check()
+  
+  def api_load_failed(self):
+    if self.apicheck.apikey_file_exist():
+      debug.log('Load APIKEY failed with: ' + str(self.apicheck.check_result()))
+      self.apicheck.apikey_load()
+      return
+      
+    if self.activated:
+      self.create_form()
+  
+  def api_load_success(self):
+    self.apikey = self.apicheck.apikey
     
     # create form only if it already been activated. othervise we done download apikey file earlier before any
     # action was taked by rhythmbox.
     
     if self.activated:
       self.create_form()
-      
+
 gobject.type_register(ShoutcastSource)

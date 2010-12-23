@@ -67,9 +67,6 @@ class Shoutcast(rb.Plugin):
     # hack, should be done within gobject constructor
     self.source.init()  
 
-    self.apicheck = service.ApikeyCheck(self.cache_dir, self.source)    
-    self.apicheck.check()
-
   def deactivate(self, shell):
     self.db = None
     self.entry_type = None
