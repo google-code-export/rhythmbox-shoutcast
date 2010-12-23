@@ -39,6 +39,7 @@ class ApikeyCheck(load.CheckDownload):
     if self.DISABLE:
       return
     
+    # if file need to be updated, do not load_key right now
     if self.check_update():
       return
 
