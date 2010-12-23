@@ -69,10 +69,4 @@ class ApikeyCheck(load.CheckDownload):
 
     apikey = self.apikey_search(file)
     
-    description = ''.join(file.readlines()).strip()
-    
-    description = description.strip('{{{')
-    description = description.strip('}}}')
-    description = description.strip()
-    
     self.rb_plugin.set_apikey(apikey)
