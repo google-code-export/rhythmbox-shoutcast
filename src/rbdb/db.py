@@ -52,7 +52,7 @@ def iter_to_entry(db, model, iter):
 
 def register_entry_type(db, name):
 
-  # rhythmbox 0.12 - 0.13 api break up
+  # rhythmbox api break up (0.12 - 0.13)
   if hasattr(db, 'entry_register_type'):
     entry_type = db.entry_register_type(name)
     
