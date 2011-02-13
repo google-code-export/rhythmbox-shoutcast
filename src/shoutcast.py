@@ -41,31 +41,47 @@ class Shoutcast(rb.Plugin):
     self.versioncheck = service.VersionCheck(self.cache_dir, self.find_file("shoutcast.rb-plugin"))    
     self.versioncheck.check()
 
-    group = rb.rb_source_group_get_by_name ("library")
-    if not group:
-      group = rb.rb_source_group_register ("library",
-                                           _("Library"),
-                                           rb.SOURCE_GROUP_CATEGORY_FIXED)
-
     self.entry_type = rbdb.register_entry_type(self.db, 'ShoutcastEntryType')
 
     width, height = gtk.icon_size_lookup(gtk.ICON_SIZE_LARGE_TOOLBAR)
     icon = gtk.gdk.pixbuf_new_from_file_at_size(self.find_file("shoutcast.png"), width, height)
 
-    self.source = gobject.new(ShoutcastSource,
-                              shell = self.shell,
-                              plugin = self,
-                              icon = icon,
-                              entry_type = self.entry_type,
-                              source_group = group,
-                              cache_dir = self.cache_dir,
-                              data_dir = self.data_dir)
+    # rhythmbox api break up (0.13.2 - 0.13.3)
+    if hasattr(rb, 'rb_source_group_get_by_name'):
+      group = rb.rb_source_group_get_by_name ("library")
 
-    shell.register_entry_type_for_source(self.source, self.entry_type)
-    shell.append_source(self.source, None)
+      if not group:
+        group = rb.rb_source_group_register ("library",
+                                             _("Library"),
+                                             rb.SOURCE_GROUP_CATEGORY_FIXED)
+      
+      self.source = gobject.new(ShoutcastSource,
+                          shell = self.shell,
+                          plugin = self,
+                          icon = icon,
+                          entry_type = self.entry_type,
+                          source_group = group,
+                          cache_dir = self.cache_dir,
+                          data_dir = self.data_dir)
+      
+      shell.register_entry_type_for_source(self.source, self.entry_type)
+      shell.append_source(self.source, None)
+    else:
+      group = rb.rb_display_page_group_get_by_id ("library")
+
+      self.source = gobject.new(ShoutcastSource,
+                          shell = self.shell,
+                          plugin = self,
+                          pixbuf = icon,
+                          entry_type = self.entry_type,
+                          cache_dir = self.cache_dir,
+                          data_dir = self.data_dir)
+        
+      shell.register_entry_type_for_source(self.source, self.entry_type)
+      shell.append_display_page(self.source, group)
     
     # hack, should be done within gobject constructor
-    self.source.init()  
+    self.source.init()
 
   def deactivate(self, shell):
     self.db = None

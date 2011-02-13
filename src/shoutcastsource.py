@@ -441,21 +441,37 @@ class ShoutcastSource(rb.StreamingSource):
     self.loadmanager.load(loader)
 
   def do_genres_show_popup(self, entry):
-    self.show_source_popup("/ShoutcastGenresViewPopup")
-    
+    # rhythmbox api break up (0.13.2 - 0.13.3)
+    if hasattr(rb, 'show_source_popup'):
+      self.show_source_popup("/ShoutcastGenresViewPopup")
+    else:
+      self.show_page_popup("/ShoutcastGenresViewPopup")
+  
     return True
 
   def do_stations_show_popup(self, entry, source):
-    self.show_source_popup("/ShoutcastSourceViewPopup")
+    # rhythmbox api break up (0.13.2 - 0.13.3)
+    if hasattr(rb, 'show_source_popup'):
+      self.show_source_popup("/ShoutcastSourceViewPopup")
+    else:
+      self.show_page_popup("/ShoutcastSourceViewPopup")
     
     return True
 
   def do_impl_show_popup(self):
-    self.show_source_popup("/ShoutcastSourceMainPopup")
+    # rhythmbox api break up (0.13.2 - 0.13.3)
+    if hasattr(rb, 'show_source_popup'):
+      self.show_source_popup("/ShoutcastSourceMainPopup")
+    else:
+      self.show_page_popup("/ShoutcastSourceMainPopup")
 
     return True
 
+  # rhyhtmbox api break up (0.13.2 - 0.13.3)
   def do_impl_get_status(self):
+    return self.do_get_status()
+  
+  def do_get_status(self):
     if self.loadmanager.load_progress():
       (text, progress) = self.loadmanager.load_get_progress()
       return (_("Loading Shoutcast stations"), text, progress)
@@ -463,7 +479,13 @@ class ShoutcastSource(rb.StreamingSource):
       qm = self.get_property("query-model")
       return (qm.compute_status_normal("%d song", "%d songs"), None, 1)
 
+  # rhyhtmbox api break up (0.13.2 - 0.13.3)
   def do_impl_activate(self):
+    self.do_selected()
+
+    rb.Source.do_impl_activate(self)
+    
+  def do_selected(self):
     if not self.activated:
       self.activated = True
       
@@ -471,13 +493,15 @@ class ShoutcastSource(rb.StreamingSource):
       
       self.create_form()
 
-    rb.Source.do_impl_activate(self)
-
   def do_impl_deactivate(self):
     if self.main_window:
       self.save_config()
 
+  # rhythmbox api break up (0.13.2 - 0.13.3)
   def do_impl_get_ui_actions(self):
+    return self.do_get_ui_actions()
+  
+  def do_get_ui_actions(self):
     return ["ShoutcastStaredStations"]
 
   def load_status_changed(self):
