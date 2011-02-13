@@ -458,7 +458,11 @@ class ShoutcastSource(rb.StreamingSource):
     
     return True
 
+  # rhythmbox api break up (0.13.2 - 0.13.3)
   def do_impl_show_popup(self):
+    return self.do_show_popup()
+   
+  def do_show_popup(self):
     # rhythmbox api break up (0.13.2 - 0.13.3)
     if hasattr(rb, 'show_source_popup'):
       self.show_source_popup("/ShoutcastSourceMainPopup")
