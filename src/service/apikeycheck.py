@@ -26,10 +26,13 @@ class ApikeyCheck(load.CheckDownload):
   DISABLE = False
   
   apikey = None
+  apiprivate = None
   
   def __init__(self, cache_dir):
     load.CheckDownload.__init__(self, os.path.join(cache_dir, 'apikey'),
                                 'http://wiki.rhythmbox-shoutcast.googlecode.com/hg/SHOUTCastKey.wiki')
+
+    self.apiprivate = self.file_local + '.private'
 
     self.check_interval = 24 * 60 * 60
 
@@ -37,6 +40,11 @@ class ApikeyCheck(load.CheckDownload):
 
   def check(self):
     if self.DISABLE:
+      return
+    
+    # do logic related to private (developers) shoutcast api keys
+    if self.apikey_file_exist_f(self.apiprivate):
+      self.apitkey_load_f(self.apiprivate)
       return
     
     # if file need to be updated, do not load_key right now
@@ -65,19 +73,25 @@ class ApikeyCheck(load.CheckDownload):
       
     raise Exception("Unable to find apikey in a file")
 
-  def apikey_load(self):
-    file = open(self.file_local)
+  def apikey_load_f(self, file):
+    file = open(file)
 
     self.apikey = self.apikey_search(file)
     
     self.load_succesed()
-    
-  def apikey_file_exist(self):
+
+  def apikey_load(self):
+    slef.apikey_load_f(file_local)
+
+  def apikey_file_exist_f(self, file):
     try:
-      (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(self.file_local)
+      (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(file)
       return True
     except OSError:
       return False
+
+  def apikey_file_exist(self):
+    return self.apikey_file_exist_f(self.file_local)
 
   # use self.check_result() to get an error text
   def load_failed(self):
