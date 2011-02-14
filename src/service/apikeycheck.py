@@ -44,7 +44,7 @@ class ApikeyCheck(load.CheckDownload):
     
     # do logic related to private (developers) shoutcast api keys
     if self.apikey_file_exist_f(self.apiprivate):
-      self.apitkey_load_f(self.apiprivate)
+      self.apikey_load_f(self.apiprivate)
       return
     
     # if file need to be updated, do not load_key right now
@@ -81,7 +81,7 @@ class ApikeyCheck(load.CheckDownload):
     self.load_succesed()
 
   def apikey_load(self):
-    slef.apikey_load_f(file_local)
+    self.apikey_load_f(self.file_local)
 
   def apikey_file_exist_f(self, file):
     try:
