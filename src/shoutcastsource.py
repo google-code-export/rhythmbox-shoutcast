@@ -442,7 +442,7 @@ class ShoutcastSource(rb.StreamingSource):
 
   def do_genres_show_popup(self, entry):
     # rhythmbox api break up (0.13.2 - 0.13.3)
-    if hasattr(rb, 'show_source_popup'):
+    if hasattr(self, 'show_source_popup'):
       self.show_source_popup("/ShoutcastGenresViewPopup")
     else:
       self.show_page_popup("/ShoutcastGenresViewPopup")
@@ -451,7 +451,7 @@ class ShoutcastSource(rb.StreamingSource):
 
   def do_stations_show_popup(self, entry, source):
     # rhythmbox api break up (0.13.2 - 0.13.3)
-    if hasattr(rb, 'show_source_popup'):
+    if hasattr(self, 'show_source_popup'):
       self.show_source_popup("/ShoutcastSourceViewPopup")
     else:
       self.show_page_popup("/ShoutcastSourceViewPopup")
@@ -464,7 +464,7 @@ class ShoutcastSource(rb.StreamingSource):
    
   def do_show_popup(self):
     # rhythmbox api break up (0.13.2 - 0.13.3)
-    if hasattr(rb, 'show_source_popup'):
+    if hasattr(self, 'show_source_popup'):
       self.show_source_popup("/ShoutcastSourceMainPopup")
     else:
       self.show_page_popup("/ShoutcastSourceMainPopup")
