@@ -1,4 +1,3 @@
-
 syntax: regexp
 \.so$
 syntax: regexp
@@ -7,3 +6,4 @@ syntax: regexp
 \.o$
 syntax: regexp
 ^totem-py-parser/totem-pl-parser\.c$
+
