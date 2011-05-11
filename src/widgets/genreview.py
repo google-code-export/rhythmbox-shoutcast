@@ -17,7 +17,7 @@
 """
 
 import rb, rhythmdb
-import gobject, gconf, gnome, os, gtk, gettext, pango
+import gobject, gconf, os, gtk, gettext, pango
 
 class GenresView(rb.PropertyView):
 

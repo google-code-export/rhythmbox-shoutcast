@@ -17,7 +17,7 @@
 """
 
 import rb, rhythmdb
-import gtk, gconf, gnome, urlparse, time
+import gtk, gconf, urlparse, time
 import debug, rbdb, load
 
 from cellpixbufbutton import *

@@ -17,7 +17,7 @@
 """
 
 import rhythmdb, rb
-import gobject, gtk, gconf, gnome, urllib, zipfile, sys, os.path, xml, datetime, string
+import gobject, gtk, gconf, urllib, zipfile, sys, os.path, xml, datetime, string
 import service, rbdb
 
 from shoutcastsource import *
