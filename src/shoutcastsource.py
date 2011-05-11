@@ -17,7 +17,7 @@
 """
 
 import rb, rhythmdb
-import gobject, os, gtk, gconf, gnome
+import gobject, os, gtk, gconf
 import load, widgets, debug, service, rbdb, service
 import xmlstore
 import traceback, sys, urllib
