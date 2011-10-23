@@ -30,7 +30,7 @@ class ApikeyCheck(load.CheckDownload):
   
   def __init__(self, cache_dir):
     load.CheckDownload.__init__(self, os.path.join(cache_dir, 'apikey'),
-                                'http://wiki.rhythmbox-shoutcast.googlecode.com/hg/SHOUTCastKey.wiki')
+                                'http://wiki.rhythmbox-shoutcast.googlecode.com/git/SHOUTCastKey.wiki')
 
     self.apiprivate = self.file_local + '.private'
 
